@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Rplidar" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Rplidar" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="../02_IMU_Attempt_2" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Rplidar" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add directory="__header" />
+			<Add directory="MPU9250/__header" />
+			<Add directory="MPU9250/inv_mpu_lib" />
+			<Add directory="rplidar" />
+			<Add directory="rplidar/sdk" />
+			<Add directory="rplidar/sdk/include" />
+			<Add directory="rplidar/sdk/src" />
+			<Add directory="rplidar/sdk/src/arch/linux" />
+			<Add directory="rplidar/sdk/src/hal" />
+		</Compiler>
+		<Linker>
+			<Add option="-lpthread" />
+			<Add option="-ldl" />
+			<Add option="-lrt" />
+			<Add option="-lz" />
+			<Add library="../../../../../usr/lib/libwiringPi.so" />
+			<Add library="../../../../../usr/lib/libwiringPiDev.so" />
+		</Linker>
+		<Unit filename="MPU9250/__header/euler_angle.h" />
+		<Unit filename="MPU9250/__header/helper_3dmath.h" />
+		<Unit filename="MPU9250/__header/mahony_ahrs.h" />
+		<Unit filename="MPU9250/__header/mpu60x0.h" />
+		<Unit filename="MPU9250/__header/mpu9250.h" />
+		<Unit filename="MPU9250/dmp.cpp" />
+		<Unit filename="MPU9250/euler_angle.cpp" />
+		<Unit filename="MPU9250/inv_mpu_lib/dmpKey.h" />
+		<Unit filename="MPU9250/inv_mpu_lib/dmpmap.h" />
+		<Unit filename="MPU9250/inv_mpu_lib/inv_mpu.cpp" />
+		<Unit filename="MPU9250/inv_mpu_lib/inv_mpu.h" />
+		<Unit filename="MPU9250/inv_mpu_lib/inv_mpu_dmp_motion_driver.cpp" />
+		<Unit filename="MPU9250/inv_mpu_lib/inv_mpu_dmp_motion_driver.h" />
+		<Unit filename="MPU9250/mahony_ahrs.cpp" />
+		<Unit filename="MPU9250/mpu9250.cpp" />
+		<Unit filename="__header/config.h" />
+		<Unit filename="__header/dmp.h" />
+		<Unit filename="__header/main.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="rplidar/sdk/include/rplidar.h" />
+		<Unit filename="rplidar/sdk/include/rplidar_cmd.h" />
+		<Unit filename="rplidar/sdk/include/rplidar_driver.h" />
+		<Unit filename="rplidar/sdk/include/rplidar_protocol.h" />
+		<Unit filename="rplidar/sdk/include/rptypes.h" />
+		<Unit filename="rplidar/sdk/src/arch/linux/arch_linux.h" />
+		<Unit filename="rplidar/sdk/src/arch/linux/net_serial.cpp" />
+		<Unit filename="rplidar/sdk/src/arch/linux/net_serial.h" />
+		<Unit filename="rplidar/sdk/src/arch/linux/thread.hpp" />
+		<Unit filename="rplidar/sdk/src/arch/linux/timer.cpp" />
+		<Unit filename="rplidar/sdk/src/arch/linux/timer.h" />
+		<Unit filename="rplidar/sdk/src/hal/abs_rxtx.h" />
+		<Unit filename="rplidar/sdk/src/hal/event.h" />
+		<Unit filename="rplidar/sdk/src/hal/locker.h" />
+		<Unit filename="rplidar/sdk/src/hal/thread.cpp" />
+		<Unit filename="rplidar/sdk/src/hal/thread.h" />
+		<Unit filename="rplidar/sdk/src/hal/util.h" />
+		<Unit filename="rplidar/sdk/src/rplidar_driver.cpp" />
+		<Unit filename="rplidar/sdk/src/rplidar_driver_serial.h" />
+		<Unit filename="rplidar/sdk/src/sdkcommon.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

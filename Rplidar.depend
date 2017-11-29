@@ -1,0 +1,374 @@
+# depslib dependency file v1.0
+1511883191 source:/home/pi/src/02_IMU_Attempt_2/main.cpp
+	<iostream>
+	<math.h>
+	<sys/time.h>
+	"mpu9250.h"
+	"euler_angle.h"
+
+1511783074 source:/home/pi/src/02_IMU_Attempt_2/mpu9250.cpp
+	"mpu9250.h"
+
+1511778324 /home/pi/src/02_IMU_Attempt_2/mpu9250.h
+	"mpu60x0.h"
+	"physical_constant.h"
+	<stdio.h>
+	<stdlib.h>
+	<wiringPi.h>
+	<wiringPiI2C.h>
+	<wiringPiSPI.h>
+
+1511750994 /home/pi/src/02_IMU_Attempt_2/mpu60x0.h
+	<stdint.h>
+
+1511765568 /home/pi/src/02_IMU_Attempt_2/physical_constant.h
+
+1511792032 source:/home/pi/src/02_IMU_Attempt_2/euler_angle.cpp
+	"euler_angle.h"
+
+1511791760 /home/pi/src/02_IMU_Attempt_2/euler_angle.h
+	<iostream>
+	<stdlib.h>
+	<math.h>
+	<sys/time.h>
+	"mpu9250.h"
+
+1511834532 source:/home/pi/src/02_IMU_Attempt_2/MPU9250/inv_mpu_lib/inv_mpu.c
+	<stdio.h>
+	<stdint.h>
+	<stdlib.h>
+	<string.h>
+	"inv_mpu.h"
+	<math.h>
+	<sys/time.h>
+	<unistd.h>
+	<stdio.h>
+	<stdlib.h>
+
+1479822050 /home/pi/src/02_IMU_Attempt_2/MPU9250/inv_mpu_lib/inv_mpu.h
+
+1479822050 source:/home/pi/src/02_IMU_Attempt_2/MPU9250/inv_mpu_lib/inv_mpu_dmp_motion_driver.c
+	<stdio.h>
+	<stdint.h>
+	<stdlib.h>
+	<string.h>
+	"inv_mpu.h"
+	"inv_mpu_dmp_motion_driver.h"
+	"dmpKey.h"
+	"dmpmap.h"
+
+1479822050 /home/pi/src/02_IMU_Attempt_2/MPU9250/inv_mpu_lib/inv_mpu_dmp_motion_driver.h
+
+1479822050 /home/pi/src/02_IMU_Attempt_2/MPU9250/inv_mpu_lib/dmpKey.h
+
+1479822050 /home/pi/src/02_IMU_Attempt_2/MPU9250/inv_mpu_lib/dmpmap.h
+
+1511880430 source:/home/pi/src/02_IMU_Attempt_2/MPU9250/mpu9250.cpp
+	"mpu9250.h"
+
+1511862345 /home/pi/src/02_IMU_Attempt_2/MPU9250/__header/mpu9250.h
+	"mpu60x0.h"
+	"physical_constant.h"
+	<stdio.h>
+	<stdlib.h>
+	<wiringPi.h>
+	<wiringPiI2C.h>
+	<wiringPiSPI.h>
+	"inv_mpu.h"
+	"inv_mpu_dmp_motion_driver.h"
+
+1511750994 /home/pi/src/02_IMU_Attempt_2/MPU9250/__header/mpu60x0.h
+	<stdint.h>
+
+1511765568 /home/pi/src/02_IMU_Attempt_2/__header/physical_constant.h
+
+1511836898 /home/pi/src/02_IMU_Attempt_2/__header/dmp.h
+	<iostream>
+	<stdio.h>
+	<stdint.h>
+	<stdlib.h>
+	<fcntl.h>
+	<unistd.h>
+	<string.h>
+	<errno.h>
+	<math.h>
+	<sys/ioctl.h>
+	<sys/types.h>
+	<sys/stat.h>
+	"mpu9250.h"
+	"helper_3dmath.h"
+	<wiringPi.h>
+
+1511852013 source:/home/pi/src/02_IMU_Attempt_2/MPU9250/dmp.cpp
+	"dmp.h"
+
+1479822050 source:/home/pi/src/02_IMU_Attempt_2/MPU9250/inv_mpu_lib/inv_mpu_dmp_motion_driver.cpp
+	<stdio.h>
+	<stdint.h>
+	<stdlib.h>
+	<string.h>
+	"inv_mpu.h"
+	"inv_mpu_dmp_motion_driver.h"
+	"dmpKey.h"
+	"dmpmap.h"
+
+1511852033 source:/home/pi/src/02_IMU_Attempt_2/MPU9250/inv_mpu_lib/inv_mpu.cpp
+	<stdio.h>
+	<stdint.h>
+	<stdlib.h>
+	<string.h>
+	"inv_mpu.h"
+	<math.h>
+	<sys/time.h>
+	<unistd.h>
+	<stdio.h>
+	<stdlib.h>
+	"dmp.h"
+
+1511836561 /home/pi/src/02_IMU_Attempt_2/MPU9250/__header/helper_3dmath.h
+
+1511881469 /home/pi/src/02_IMU_Attempt_2/MPU9250/__header/euler_angle.h
+	<iostream>
+	<stdlib.h>
+	<math.h>
+	<sys/time.h>
+	"mpu9250.h"
+
+1511882389 source:/home/pi/src/02_IMU_Attempt_2/MPU9250/euler_angle.cpp
+	"euler_angle.h"
+
+1511881067 /home/pi/src/02_IMU_Attempt_2/MPU9250/__header/mahony_ahrs.h
+
+1511881199 source:/home/pi/src/02_IMU_Attempt_2/MPU9250/mahony_ahrs.cpp
+	"mahony_ahrs.h"
+	<math.h>
+
+1511925580 source:/home/pi/src/__Rplidar/03_RpLidar/main.cpp
+	"main.h"
+
+1511925585 /home/pi/src/__Rplidar/03_RpLidar/__header/main.h
+	<iostream>
+	<math.h>
+	<sys/time.h>
+	"config.h"
+	"mpu9250.h"
+	"euler_angle.h"
+
+1511834115 /home/pi/src/__Rplidar/03_RpLidar/__header/config.h
+
+1511862345 /home/pi/src/__Rplidar/03_RpLidar/MPU9250/__header/mpu9250.h
+	"mpu60x0.h"
+	"physical_constant.h"
+	<stdio.h>
+	<stdlib.h>
+	<wiringPi.h>
+	<wiringPiI2C.h>
+	<wiringPiSPI.h>
+	"inv_mpu.h"
+	"inv_mpu_dmp_motion_driver.h"
+
+1511750994 /home/pi/src/__Rplidar/03_RpLidar/MPU9250/__header/mpu60x0.h
+	<stdint.h>
+
+1511765568 /home/pi/src/__Rplidar/03_RpLidar/__header/physical_constant.h
+
+1479822050 /home/pi/src/__Rplidar/03_RpLidar/MPU9250/inv_mpu_lib/inv_mpu.h
+
+1479822050 /home/pi/src/__Rplidar/03_RpLidar/MPU9250/inv_mpu_lib/inv_mpu_dmp_motion_driver.h
+
+1511881469 /home/pi/src/__Rplidar/03_RpLidar/MPU9250/__header/euler_angle.h
+	<iostream>
+	<stdlib.h>
+	<math.h>
+	<sys/time.h>
+	"mpu9250.h"
+
+1511852013 source:/home/pi/src/__Rplidar/03_RpLidar/MPU9250/dmp.cpp
+	"dmp.h"
+
+1511836898 /home/pi/src/__Rplidar/03_RpLidar/__header/dmp.h
+	<iostream>
+	<stdio.h>
+	<stdint.h>
+	<stdlib.h>
+	<fcntl.h>
+	<unistd.h>
+	<string.h>
+	<errno.h>
+	<math.h>
+	<sys/ioctl.h>
+	<sys/types.h>
+	<sys/stat.h>
+	"mpu9250.h"
+	"helper_3dmath.h"
+	<wiringPi.h>
+
+1511836561 /home/pi/src/__Rplidar/03_RpLidar/MPU9250/__header/helper_3dmath.h
+
+1511882389 source:/home/pi/src/__Rplidar/03_RpLidar/MPU9250/euler_angle.cpp
+	"euler_angle.h"
+
+1511852033 source:/home/pi/src/__Rplidar/03_RpLidar/MPU9250/inv_mpu_lib/inv_mpu.cpp
+	<stdio.h>
+	<stdint.h>
+	<stdlib.h>
+	<string.h>
+	"inv_mpu.h"
+	<math.h>
+	<sys/time.h>
+	<unistd.h>
+	<stdio.h>
+	<stdlib.h>
+	"dmp.h"
+
+1479822050 source:/home/pi/src/__Rplidar/03_RpLidar/MPU9250/inv_mpu_lib/inv_mpu_dmp_motion_driver.cpp
+	<stdio.h>
+	<stdint.h>
+	<stdlib.h>
+	<string.h>
+	"inv_mpu.h"
+	"inv_mpu_dmp_motion_driver.h"
+	"dmpKey.h"
+	"dmpmap.h"
+
+1479822050 /home/pi/src/__Rplidar/03_RpLidar/MPU9250/inv_mpu_lib/dmpKey.h
+
+1479822050 /home/pi/src/__Rplidar/03_RpLidar/MPU9250/inv_mpu_lib/dmpmap.h
+
+1511881199 source:/home/pi/src/__Rplidar/03_RpLidar/MPU9250/mahony_ahrs.cpp
+	"mahony_ahrs.h"
+	<math.h>
+
+1511881067 /home/pi/src/__Rplidar/03_RpLidar/MPU9250/__header/mahony_ahrs.h
+
+1511880430 source:/home/pi/src/__Rplidar/03_RpLidar/MPU9250/mpu9250.cpp
+	"mpu9250.h"
+
+1464839068 source:/home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/arch/linux/net_serial.cpp
+	"arch/linux/arch_linux.h"
+	"arch/linux/net_serial.h"
+	<termios.h>
+	<sys/select.h>
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/arch/linux/arch_linux.h
+	<stdio.h>
+	<stdint.h>
+	<string.h>
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<time.h>
+	<stdarg.h>
+	<iostream>
+	<string>
+	<unistd.h>
+	<errno.h>
+	<pthread.h>
+	<sys/time.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<fcntl.h>
+	<sys/ioctl.h>
+	<sys/select.h>
+	<time.h>
+	"arch/linux/timer.h"
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/arch/linux/timer.h
+	"rptypes.h"
+	<unistd.h>
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/include/rptypes.h
+	<stdint.h>
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/arch/linux/net_serial.h
+	"hal/abs_rxtx.h"
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/hal/abs_rxtx.h
+	"rptypes.h"
+
+1464839068 source:/home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/arch/linux/timer.cpp
+	"arch/linux/arch_linux.h"
+
+1464839068 source:/home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/hal/thread.cpp
+	"sdkcommon.h"
+	"hal/thread.h"
+	"arch/win32/winthread.hpp"
+	"arch/macOS/thread.hpp"
+	"arch/linux/thread.hpp"
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/sdkcommon.h
+	"arch\win32\arch_win32.h"
+	"arch/macOS/arch_macOS.h"
+	"arch/linux/arch_linux.h"
+	"rplidar.h"
+	"hal/util.h"
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/arch/macOS/arch_macOS.h
+	<stdio.h>
+	<stdint.h>
+	<string.h>
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<time.h>
+	<stdarg.h>
+	<iostream>
+	<string>
+	<unistd.h>
+	<errno.h>
+	<pthread.h>
+	<sys/time.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<fcntl.h>
+	<sys/ioctl.h>
+	<time.h>
+	"arch/macOS/timer.h"
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/arch/macOS/timer.h
+	"rptypes.h"
+	<unistd.h>
+
+1481548404 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/include/rplidar.h
+	"rptypes.h"
+	"rplidar_protocol.h"
+	"rplidar_cmd.h"
+	"rplidar_driver.h"
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/include/rplidar_protocol.h
+
+1472455332 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/include/rplidar_cmd.h
+	"rplidar_protocol.h"
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/include/rplidar_driver.h
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/hal/util.h
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/hal/thread.h
+	"rptypes.h"
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/arch/win32/winthread.hpp
+	"sdkcommon.h"
+	<process.h>
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/arch/macOS/thread.hpp
+	"arch/macOS/arch_macOS.h"
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/arch/linux/thread.hpp
+	"arch/linux/arch_linux.h"
+	<sched.h>
+
+1464839068 source:/home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/rplidar_driver.cpp
+	"sdkcommon.h"
+	"hal/abs_rxtx.h"
+	"hal/thread.h"
+	"hal/locker.h"
+	"hal/event.h"
+	"rplidar_driver_serial.h"
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/hal/locker.h
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/hal/event.h
+
+1464839068 /home/pi/src/__Rplidar/03_RpLidar/rplidar/sdk/src/rplidar_driver_serial.h
+

@@ -1,0 +1,77 @@
+#include "main.h"
+
+using namespace std;
+
+__vec3f A, G, H;
+
+int main(void) {
+
+	int stat;
+	int i;
+
+	__e_angle E;
+
+	// 初始化9250
+	while (true) {
+
+		stat = IMU.init();
+		if (stat == 0)
+			break;
+
+
+		cout << "IMU Initiation is a failure, Code:" << stat << endl;
+		delay(1000);		// 1s
+	}
+
+
+	i = 0;
+	while (true) {
+
+		update_IMUData();
+
+		E.process_Data(A, G, H);
+
+		if (i % 100 == 0) {
+
+			cout << "Ax: " << A.X << " Ay: " << A.Y << " Az: " << A.Z << endl;
+			cout << "Gx: " << G.X << " Gy: " << G.Y << " Gz: " << G.Z << endl;
+			cout << "Hx: " << H.X << " Hy: " << H.Y << " Hz: " << H.Z << endl;
+			cout << endl;
+
+			cout << "Pitch: " << E.Pitch << endl;
+			cout << "Roll:  " << E.Roll  << endl;
+			cout << "Yaw:   " << E.Yaw   << endl;
+			cout << endl;
+			cout << endl;
+
+		}
+		i++;
+		delay(5);
+	}
+
+
+    cout << "Hello world!" << endl;
+    return 0;
+}// main
+
+void update_IMUData() {
+
+		float ax, ay, az;
+		float gx, gy, gz;
+		int16_t hx, hy, hz;
+		IMU.get_Accel(&ax, &ay, &az);
+		IMU.get_Gyro(&gx, &gy, &gz);
+		IMU.get_Mag_HT(&hx, &hy, &hz);
+
+		A.X = ax;
+		A.Y = ay;
+		A.Z = az;
+		G.X = gx;
+		G.Y = gy;
+		G.Z = gz;
+		H.X = hx;
+		H.Y = hy;
+		H.Z = hz;
+
+}// void update_IMUData()
+
