@@ -41,6 +41,7 @@
 			<Add directory="rplidar/sdk/src" />
 			<Add directory="rplidar/sdk/src/arch/linux" />
 			<Add directory="rplidar/sdk/src/hal" />
+			<Add directory="rplidar/__header" />
 		</Compiler>
 		<Linker>
 			<Add option="-lpthread" />
@@ -49,6 +50,26 @@
 			<Add option="-lz" />
 			<Add library="../../../../../usr/lib/libwiringPi.so" />
 			<Add library="../../../../../usr/lib/libwiringPiDev.so" />
+			<Add library="../../../../../usr/lib/arm-linux-gnueabihf/libpthread.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_calib3d.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_contrib.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_core.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_features2d.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_flann.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_gpu.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_highgui.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_imgproc.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_legacy.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_ml.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_nonfree.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_objdetect.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_ocl.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_photo.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_stitching.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_superres.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_ts.a" />
+			<Add library="../../../../../usr/local/lib/libopencv_video.so" />
+			<Add library="../../../../../usr/local/lib/libopencv_videostab.so" />
 		</Linker>
 		<Unit filename="MPU9250/__header/euler_angle.h" />
 		<Unit filename="MPU9250/__header/helper_3dmath.h" />
@@ -69,6 +90,9 @@
 		<Unit filename="__header/dmp.h" />
 		<Unit filename="__header/main.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="rplidar/lidar_image.cpp" />
+		<Unit filename="rplidar/obstacle.cpp" />
+		<Unit filename="rplidar/position.cpp" />
 		<Unit filename="rplidar/sdk/include/rplidar.h" />
 		<Unit filename="rplidar/sdk/include/rplidar_cmd.h" />
 		<Unit filename="rplidar/sdk/include/rplidar_driver.h" />
@@ -89,6 +113,7 @@
 		<Unit filename="rplidar/sdk/src/rplidar_driver.cpp" />
 		<Unit filename="rplidar/sdk/src/rplidar_driver_serial.h" />
 		<Unit filename="rplidar/sdk/src/sdkcommon.h" />
+		<Unit filename="rplidar/tinyslam.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
