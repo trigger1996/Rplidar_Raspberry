@@ -8,7 +8,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#ifdef WIN32
+	#include <time.h>
+#else
+	#include <sys/time.h>
+#endif
 
 #include <rplidar.h>
 #include <physical_constant.h>
@@ -137,6 +141,8 @@ typedef struct
 {
 	bool is_Line;
 	bool is_Circle;
+	bool is_New;
+	bool is_Updated;
 
 	__pos Center;
 
@@ -161,3 +167,34 @@ typedef struct {
 	int val[ANGLE_ALL];
 	int nb_points;
 } __ts_scan_t;
+
+
+typedef struct {
+
+	float Pitch;
+	float Roll;
+	float Yaw;
+
+} __AHRS;
+
+typedef struct
+{
+	int X;
+	int Y;
+
+} __point2f;
+
+typedef struct
+{
+	float r;
+	float deg;
+
+} __point2p;
+
+typedef struct
+{
+	float X;
+	float Y;
+	float Z;
+
+} __Vec3f;

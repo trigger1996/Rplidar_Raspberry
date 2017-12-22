@@ -90,7 +90,7 @@ float __e_angle::process_Data(__vec3f a, __vec3f g, __vec3f h) {
 	// http://blog.csdn.net/aileenyuxiao/article/details/44172061
 	float hx = Mag.Y*cos(Pitch) + Mag.Y*sin(Pitch)*sin(Roll) - Mag.Z*cos(Roll)*sin(Pitch);
 	float hy = Mag.X*cos(Roll) + Mag.Z*sin(Roll);
-	threshold = 0.75f;
+	threshold = 0.988f;
 
 	angle_s = atan2(hy, hx) * 180.0f / PI;
 //	calc_Q(Gyro.X, Gyro.Y, Gyro.Z, Acc.X, Acc.Y, Acc.Z);

@@ -1,5 +1,9 @@
 ﻿#include <obstacle.h>
 
+
+const int dx_1 = 1;
+const int dx_2 = 5;
+
 __obstacle_group::__obstacle_group()
 {
 	Mat zero(LidarImageHeight, LidarImageWidth, CV_8UC3, Scalar(0, 0, 0));		// 图片格式： BGR
@@ -34,7 +38,7 @@ int __obstacle_group::get_Array(float data[])
 			Data[i] = 0.0f;
 
 	}
-	
+
 	return SUCCESS;
 
 }// int __obstacle_group::get_Array(float data[])
@@ -111,7 +115,7 @@ int __obstacle_group::draw(Mat &dst, vector<__obstacle_line> ob)
 
 		for (j = 0; j < ANGLE_ALL; j++)
 		{
-			if (ob[i].Position[j] != 0.0f)		
+			if (ob[i].Position[j] != 0.0f)
 			{
 				theta = j * PI / 180;
 				rho = ob[i].Position[j];
@@ -249,6 +253,10 @@ int __obstacle_group::calc_Lines()
 	morphologyEx(Img_Initial, Img_Initial, MORPH_CLOSE, element);
 	//imshow("Close", Img_Initial);
 
+	// 图像预处理之二
+	// 删除掉多余的点
+	remove_Standlone_Pts();
+
 	// 霍夫变换
 	vector<Vec2f> lines;
 	HoughLines(Img_Initial, lines, 0.5, CV_PI / 360 * 1.5, 32);	// 前面就跑过一次cvtColor了
@@ -360,7 +368,7 @@ int __obstacle_group::calc_Lines()
 	OLines[i].Rho   = rho;
 
 	}
-	
+
 	// 尝试删除多余的
 	merge_LineGroup();
 
@@ -380,15 +388,15 @@ int __obstacle_group::calc_Lines()
 int __obstacle_group::surf()
 {
 	//【2】使用SURF算子检测关键点
-	int minHessian  = 5500;					// 700	//SURF算法中的hessian阈值  
-	SurfFeatureDetector detector(minHessian);//定义一个SurfFeatureDetector（SURF） 特征检测类对象    
-	std::vector<KeyPoint> keyPoint1, keyPoints2;//vector模板类，存放任意类型的动态数组  
+	int minHessian  = 5500;					// 700	//SURF算法中的hessian阈值
+	SurfFeatureDetector detector(minHessian);//定义一个SurfFeatureDetector（SURF） 特征检测类对象
+	std::vector<KeyPoint> keyPoint1, keyPoints2;//vector模板类，存放任意类型的动态数组
 
-												//【3】调用detect函数检测出SURF特征关键点，保存在vector容器中  
+												//【3】调用detect函数检测出SURF特征关键点，保存在vector容器中
 	detector.detect(Img_Lines, keyPoint1 );
 	detector.detect(Img_Lines_Last, keyPoints2 );
 
-	//【4】计算描述符（特征向量）  
+	//【4】计算描述符（特征向量）
 	SurfDescriptorExtractor extractor;
 	Mat descriptors1, descriptors2;
 	extractor.compute(Img_Lines, keyPoint1, descriptors1 );
@@ -397,16 +405,16 @@ int __obstacle_group::surf()
 	if (keyPoint1.size() == 0 || keyPoints2.size() == 0)
 		return FAILED;
 
-	//【5】使用BruteForce进行匹配  
-	// 实例化一个匹配器  
+	//【5】使用BruteForce进行匹配
+	// 实例化一个匹配器
 	BruteForceMatcher< L2<float> > matcher;
 	std::vector< DMatch > matches;
-	//匹配两幅图中的描述子（descriptors）  
+	//匹配两幅图中的描述子（descriptors）
 	matcher.match(descriptors1, descriptors2, matches );
 
-	//【6】绘制从两个图像中匹配出的关键点  
+	//【6】绘制从两个图像中匹配出的关键点
 	Mat imgMatches;
-	drawMatches(Img_Lines, keyPoint1, Img_Lines_Last, keyPoints2, matches, imgMatches );//进行绘制  
+	drawMatches(Img_Lines, keyPoint1, Img_Lines_Last, keyPoints2, matches, imgMatches );//进行绘制
 
 	double min_dist = 100, max_dist = 0;
 	for (int i = 0; i < descriptors1.rows; i++)
@@ -418,7 +426,7 @@ int __obstacle_group::surf()
 	printf("MAX: %f\n", max_dist);
 	printf("MIN: %f\n", min_dist);
 
-	//【7】显示效果图  
+	//【7】显示效果图
 	imshow("匹配图", imgMatches );
 
 	return SUCCESS;
@@ -475,3 +483,45 @@ int __obstacle_group::merge_LineGroup()
 	return SUCCESS;
 
 }// int __obstacle_group::merge_LineGroup()
+
+int __obstacle_group::remove_Standlone_Pts()
+{
+	// 去掉多余的点
+	// 图像 + 几何手段
+    Mat test = Img_Initial.clone();
+
+	GaussianBlur(test, test, Size(5, 5), 0, 0);
+	threshold(test, test, 255 * 0.60f, 255, CV_THRESH_BINARY);		// 255 * 0.65f
+	//imshow("test", test);
+
+	// 这边用类似画图的方法去查点，如果查到的点在滤波后的图上不存在，则可以认为这个点是孤i点，可以被去掉
+	int x, y;
+	double theta, rho;
+	int halfWidth = test.cols / 2;
+	int halfHeight = test.rows / 2;
+
+	for (unsigned int i = 0; i < ANGLE_ALL; i++)	// scan_data.size()
+	{
+		theta = i * PI / 180;
+		rho = Data[i];
+
+		if (rho <= Rplidar_Max_Range / 200.0f)
+			continue;
+
+		x = (int)(rho  * sin(theta) / 20) + halfWidth;
+		y = (int)(-rho * cos(theta) / 20) + halfHeight;
+
+		if ((x >= 0 && x < LidarImageWidth) &&
+			(y >= 0 && y < LidarImageHeight))		// 检查这些点在不在图内
+		{
+			// 如果这个点在实际的图上不存在，则把这个点去掉
+			if (test.at<uchar>(y, x) == 0)
+				Data[i] = 0;
+		}
+	}
+
+	// 注意，这边把图回传，以增加霍夫变换的识别率
+	return SUCCESS;
+
+}// int __obstacle_group::remove_Standlone_Pts()
+

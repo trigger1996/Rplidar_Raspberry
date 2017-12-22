@@ -3,18 +3,22 @@
 #define __Main_H
 
 #include <iostream>
+#include <unistd.h>
+#include <stdlib.h>
 #include <math.h>
 #include <sys/time.h>
 #include <config.h>
 
-#include "mpu9250.h"
-#include "euler_angle.h"
+//#include "mpu9250.h"
+//#include "euler_angle.h"
+#include "datalink.h"
 
 #include "lidar_image.h"
 #include "obstacle.h"
-#include "position.h"
+#include "z_lidar.h"
 
-#include "tinyslam.h"
+#include "ekf_slam.h"
+//#include "tinyslam.h"
 
 using namespace std;
 using namespace cv;

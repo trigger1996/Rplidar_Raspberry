@@ -251,18 +251,27 @@ int __lidar_img::Vlct_Orthogonal_Decomposition(float vlct[])
 	// 速度正交分解
 	// 并且对两个分量去掉0的值，求平均
 	int i;
-	double vx, vy;
+	float vx, vy;
 
 	// 速度正交分解，求平均
 	vx = vy = 0;
 	for (i = 0; i < ANGLE_ALL; i++)
 	{
-		vx += vlct[i] * cos(i * PI / 180.0f);
-		vy += vlct[i] * sin(i * PI / 180.0f);
+		if (vlct[i] == NAN)
+			continue;
+
+		if (vlct[i] == INFINITY)
+			continue;
+
+		vx += vlct[i] / 1000.0f * cos(i * PI / 180.0f);
+		vy += vlct[i] / 1000.0f * sin(i * PI / 180.0f);
+
+		printf("vx: %f\n", vx);
 	}
 
 	Vx = vx / ANGLE_ALL;
 	Vy = vy / ANGLE_ALL;
+
 
 	Vx = -Vx;
 	Vy = -Vy;

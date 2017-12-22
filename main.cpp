@@ -39,45 +39,40 @@
 		增大每次作图的点半径，提高霍夫变换命中率，这样来实现更低的障碍物分类阈值，实现将曲线拟合成直线
 */
 
-__vec3f A, G, H;
-
 int main(int argc, char *argv[]) {
 
 	int stat;
 	int i;
 
-	__e_angle E;
-
-	// 初始化9250
-	while (true) {
-
-		stat = IMU.init();
-		if (stat == 0)
-			break;
-
-
-		cout << "IMU Initiation is a failure, Code:" << stat << endl;
-		delay(1000);		// 1s
-	}
+	__pix_link Pix_Link;
 
 	// 初始化激光雷达
 	const char * opt_com_path = NULL;
 	_u32         opt_com_baudrate = 115200;
 	u_result     op_result;
-	int Yaw = 90;
+	int Yaw = 0;
 
 	Mat kalman;
 
 	// 处理类
 	__lidar_img Lidar_Img;
 	__obstacle_group OG;
-	__positioning    P;
-	//__tinyslam ts;
+	__z_lidar Z;
+	__ekf_slam EKF;
 
 
 	// OpenCV测试
-	Mat hk416 = imread("hk416.jpg");
-	imshow("hk416", hk416);
+	//Mat hk416 = imread("hk416.jpg");
+	//imshow("hk416", hk416);
+
+	// 初始化数据链
+	wiringPiSetupSys();
+	while (Pix_Link.init() <= 0)
+	{
+		cout << "datalink init failed" << endl;
+		sleep(1);
+	}
+	cout << "serial opened" << endl;
 
 	// read serial port from the command line...
 	if (argc>1) opt_com_path = argv[1]; // or set to a fixed value: e.g. "com3"
@@ -137,13 +132,20 @@ int main(int argc, char *argv[]) {
 	drv->startMotor();
 	drv->startScan();
 
+	// 先运行一段时间，得到偏航角，再slam
+	i = 0;
+	while (i < 6)
+	{
+		Pix_Link.get_Data();
+		Yaw = Pix_Link.Eular_Angle.Yaw;
+
+		i++;
+		usleep(250000);
+	}
+
 
 	i = 0;
 	while (true) {
-
-		update_IMUData();
-
-		E.process_Data(A, G, H);
 
 		rplidar_response_measurement_node_t nodes[360 * 2];
 		size_t   count = _countof(nodes);
@@ -162,46 +164,37 @@ int main(int argc, char *argv[]) {
 
 			// 数据角度归一化，预处理、滤波，计算速度
 			Lidar_Img.Normalize_Data(Lidar_Img.Data);
-			Lidar_Img.calc_Velocity();
-			Lidar_Img.Kalman_Filter(0.0f, 0.0f);
-			Lidar_Img.normalize_Orentation(Lidar_Img.Data_KArray, Yaw);
+			//Lidar_Img.calc_Velocity();
+			//Lidar_Img.Kalman_Filter(0, 0);
+			Lidar_Img.normalize_Orentation(Lidar_Img.Data_NArray, Yaw + 360);	// Yaw
+			//Lidar_Img.Vlct_Orthogonal_Decomposition(Lidar_Img.Data_KArray);
 
-			// 预处理结果
-			Lidar_Img.Draw(kalman, Lidar_Img.Data_KArray, "Dst_Kalman");
+			// 第一轮预处理结果
+			//Lidar_Img.Draw(kalman, Lidar_Img.Data_NArray, "Dst_Kalman");
 
 			// 建图
-			OG.get_Array(Lidar_Img.Data_KArray);
+			OG.get_Array(Lidar_Img.Data_NArray);
 			OG.draw();
 			OG.calc_Lines();
-			//OG.surf();
-
-			// tinyslam测试
-			//ts.Run(Lidar_Img.Data_KArray, Lidar_Img.Data, Lidar_Img.Vx, Lidar_Img.Vy);
-
 			// 自制建图算法测试
-			P.update_LineGroup(OG.OLines);
-			P.calc_Grid_Velocity(Lidar_Img.Vx, Lidar_Img.Vy, frequency);
+			Z.update_LineGroup(OG.OLines);
+			Z.calc_Lidar(frequency);
 
-			i = 0;
+			EKF.get_Sensor(Z.rGrid, Pix_Link.Acc, Pix_Link.W, Yaw, 1 / frequency);
+			EKF.run();
+
+
+			i = 0;			// 知道这里有个bug，不管了
 			waitKey(30);
 		}
 
-		// 显示处理得到的角度数据
-		if (i % 100 == 0) {
+		Pix_Link.get_Data();
+		Yaw = Pix_Link.Eular_Angle.Yaw;
 
-			//cout << "Ax: " << A.X << " Ay: " << A.Y << " Az: " << A.Z << endl;
-			//cout << "Gx: " << G.X << " Gy: " << G.Y << " Gz: " << G.Z << endl;
-			//cout << "Hx: " << H.X << " Hy: " << H.Y << " Hz: " << H.Z << endl;
-
-			cout << "Pitch: " << E.Pitch << endl;
-			cout << "Roll:  " << E.Roll  << endl;
-			cout << "Yaw:   " << E.Yaw   << endl;
-			cout << endl;
-			cout << endl;
-
-		}
 		i++;
-		delay(5);
+		//usleep(50000);		// 50ms
+								// 因为数据链路自己会卡死一会儿，所以不用在这里等待
+
 	}
 
 
@@ -209,26 +202,6 @@ int main(int argc, char *argv[]) {
     return 0;
 }// main
 
-void update_IMUData() {
-
-		float ax, ay, az;
-		float gx, gy, gz;
-		int16_t hx, hy, hz;
-		IMU.get_Accel(&ax, &ay, &az);
-		IMU.get_Gyro(&gx, &gy, &gz);
-		IMU.get_Mag_HT(&hx, &hy, &hz);
-
-		A.X = ax;
-		A.Y = ay;
-		A.Z = az;
-		G.X = gx;
-		G.Y = gy;
-		G.Z = gz;
-		H.X = hx;
-		H.Y = hy;
-		H.Z = hz;
-
-}// void update_IMUData()
 
 bool checkRPLIDARHealth(RPlidarDriver * drv)
 {

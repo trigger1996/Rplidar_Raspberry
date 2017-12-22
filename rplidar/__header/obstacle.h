@@ -36,6 +36,7 @@ private:
 
 
 	int merge_LineGroup();
+	int remove_Standlone_Pts();
 
 
 };
