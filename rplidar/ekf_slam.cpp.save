@@ -98,7 +98,7 @@ int __ekf_slam::run()
 	F(0, 2) = (Acc.X * dt * dt + 0.5 * Acc.X * dt * dt) *  cos(phi);
 	F(1, 2) = (Acc.Y * dt * dt + 0.5 * Acc.Y * dt * dt) * -sin(phi);
 
-	// cout << "F: " << endl << F << endl;
+	//cout << "F: " << endl << F << endl;
 
 	// W
 	W.resize(X.rows(), X.rows());			// 你又没看错，就是这么写的
@@ -119,8 +119,7 @@ int __ekf_slam::run()
 	for (int i = 3; i < X.rows(); i++)
 		Xe(i, 0) = X(i, 0);
 
-	//cout << "Xe: " << endl << Xe << endl;
-
+	cout << "Xe: " << endl << Xe << endl;
 
 	// 公式2
 	MatrixXd F_T = F.transpose();
@@ -157,13 +156,13 @@ int __ekf_slam::run()
 	// 这货最难算
 	Jh.resize(Z.rows(), X.rows());
 	Jh.setZero();
-	for (int i = 0, j = 0; i < Z.rows() - 1; i += 2, j++)
+	for (int i = 0; i < Z.rows() - 1; i += 2)
 	{
 		double x_k  = Xe(0, 0);
 		double y_k  = Xe(1, 0);
-		double m_ik = Xe(3 + j, 0);			// 障碍物的x坐标
-		double n_ik = Xe(3 + j + 1, 0);		// 障碍物的y坐标
-		double r_ik = Z(j, 0);
+		double m_ik = Xe(3 + i, 0);			// 障碍物的x坐标
+		double n_ik = Xe(3 + i + 1, 0);		// 障碍物的y坐标
+		double r_ik = Z(i, 0);
 
 		Jh(i, 0)     = (x_k - m_ik) / r_ik;							// 注意这里的几个变量，如果变量爆炸了这里就全错了
 		Jh(i + 1, 0) = (y_k - n_ik) / (r_ik * r_ik);
@@ -177,9 +176,9 @@ int __ekf_slam::run()
 
 	}
 
-	cout << "Jh: " << endl << Jh << endl;
+	//cout << "Jh: " << endl << Jh << endl;
 
-/*
+
 	// 公式3
 	MatrixXd Jh_T = Jh.transpose();
 	MatrixXd V_T  = V.transpose();
@@ -187,14 +186,16 @@ int __ekf_slam::run()
 	inv = inv.inverse();
 	K = Pe * Jh_T * inv;
 
+	//cout << "K: " << endl << K << endl;
+
 
 	H.resize(2 * landmark_num, 1);
-	for (int i = 0; i < H.rows(); i += 2)
+	for (int i = 0; i < Z.rows() - 1; i += 2)
 	{
-		double x_k = Xe(0, 0);
-		double y_k = Xe(1, 0);
+		double x_k  = Xe(0, 0);
+		double y_k  = Xe(1, 0);
 		double m_ik = Xe(3 + i, 0);			// 障碍物的x坐标
-		double n_ik = Xe(3 + i + i, 0);		// 障碍物的y坐标
+		double n_ik = Xe(3 + i + 1, 0);		// 障碍物的y坐标
 
 		// r
 		H(i, 0) = sqrt((x_k - m_ik) * (x_k - m_ik) + (y_k - n_ik) * (y_k - n_ik));
@@ -210,16 +211,21 @@ int __ekf_slam::run()
 	// 公式4
 	X = Xe + K * (Z - H);
 
+	//cout << "X: " << endl << X << endl;
+
+
 	// 公式5
 	MatrixXd I;
 	I.resize(Pe.cols(), Pe.rows());
 	for (int i = 0; i < I.rows(); i++)
-		for (int j = 0; j < I.cols(); j++)
-			if (i == j)
-				I(i, j) = 1;
+				I(i, i) = 1;
 
-	P = (I - K * Jh) * P;
-*/
+	P = (I - K * Jh) * Pe;
+	
+	cout << 
+
+
+
 	return 0;
 
 }// int __ekf_slam::run()

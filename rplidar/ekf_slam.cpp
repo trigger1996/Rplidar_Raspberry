@@ -98,7 +98,7 @@ int __ekf_slam::run()
 	F(0, 2) = (Acc.X * dt * dt + 0.5 * Acc.X * dt * dt) *  cos(phi);
 	F(1, 2) = (Acc.Y * dt * dt + 0.5 * Acc.Y * dt * dt) * -sin(phi);
 
-	// cout << "F: " << endl << F << endl;
+	//cout << "F: " << endl << F << endl;
 
 	// W
 	W.resize(X.rows(), X.rows());			// 你又没看错，就是这么写的
@@ -119,8 +119,7 @@ int __ekf_slam::run()
 	for (int i = 3; i < X.rows(); i++)
 		Xe(i, 0) = X(i, 0);
 
-	//cout << "Xe: " << endl << Xe << endl;
-
+	cout << "Xe: " << endl << Xe << endl;
 
 	// 公式2
 	MatrixXd F_T = F.transpose();
@@ -175,8 +174,18 @@ int __ekf_slam::run()
 		Jh(i + 1, 3 + i)     = -(y_k - n_ik) / (r_ik * r_ik);
 		Jh(i + 1, 3 + i + 1) = -(x_k - m_ik) / (r_ik * r_ik);
 
-		// 加个保险，这边因为Jh很容易算出来非常小的东西，这边把足够小的一些东西置0
+		if (r_ik == 0)
+		{
+			Jh(i, 0)     = 0;
+			Jh(i + 1, 0) = 0;
+			Jh(i, 1)     = 0;
+			Jh(i + 1, 1) = 0;
 
+			Jh(i, 3 + i)         = 0;
+			Jh(i, 3 + i + 1)     = 0;
+			Jh(i + 1, 3 + i)     = 0;
+			Jh(i + 1, 3 + i + 1) = 0;
+		}
 
 	}
 
@@ -190,9 +199,8 @@ int __ekf_slam::run()
 	inv = inv.inverse();
 	K = Pe * Jh_T * inv;
 
-	//cout << "Pe * Jh_T" << endl;
+	cout << "K: " << endl << K << endl;
 
-	//cout << "K: " << endl << K << endl;
 
 
 	H.resize(2 * landmark_num, 1);
@@ -208,6 +216,7 @@ int __ekf_slam::run()
 		// theta
 		H(i + 1, 0) = atan2((x_k - m_ik), (y_k - n_ik)); 						// 注意这里会爆炸
 
+		cout << "Hi: " << H(i + 1, 0) << endl;
 		//
 		//
 		//	角度要做个补偿！！！！！！！！
@@ -226,7 +235,10 @@ int __ekf_slam::run()
 	for (int i = 0; i < I.rows(); i++)
 				I(i, i) = 1;
 
-	P = (I - K * Jh) * P;
+	P = (I - K * Jh) * Pe;
+
+	cout << "P: " << endl << P << endl;
+
 
 	return 0;
 
@@ -249,18 +261,18 @@ int __ekf_slam::get_Sensor(vector<__point2p> lidar, __Vec3f a, __Vec3f w, float 
 	// 前次状态的保存的任务交给旧的建图和匹配模块，故这里无需关心，因为前一级已经处理好了
 	for (int i = 0, j = 0; i < Z.rows() - 1; i += 2, j++)
 	{
-		Z(i, 0)     = lidar[j].r;
+		Z(i, 0)     = lidar[j].r / 1000.0f;				// mm/s^2 -> m/s^2
 		Z(i + 1, 0) = lidar[j].deg * PI / 180.0f;
 	}
 
 	//for (int i = 0; i < lidar.size(); i++)
 	//	cout << "lidar.r: " << lidar[i].r << "lidar.deg: " << lidar[i].deg << endl;
-	cout << Z << endl << " " << endl;
+	//cout << Z << endl << " " << endl;
 
 	// 加速度
-	Acc.X = a.X * 1000.0f;		// m/s^2 -> mm/s^2
-	Acc.Y = a.Y * 1000.0f;
-	Acc.Z = a.Z * 1000.0f;
+	Acc.X = a.X;
+	Acc.Y = a.Y;
+	Acc.Z = a.Z;
 
 	// 角速度
 	Gyro.X = w.X;
