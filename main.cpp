@@ -195,6 +195,9 @@ int main(int argc, char *argv[]) {
 							Pitch, Roll, Yaw, dt);
 			EKF.run(true);
 
+			// 打印结果
+			Z.draw_Map(false);
+			Z.update_Position_on_Map(EKF.current_Pos, Yaw, true);
 
 			i = 0;			// 知道这里有个bug，不管了
 			waitKey(30);

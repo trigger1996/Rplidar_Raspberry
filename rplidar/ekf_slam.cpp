@@ -27,7 +27,7 @@ int __ekf_slam::run(bool is_updated)
 
 	// 进行协方差的预测
 	// Calculate Jacobian A based on vehicle model(df / dx)
-	F(0, 0) = 1; F(0, 1) = 0; F(0, 2) = (Acc.X * dt * dt + 0.5 * Acc.X * dt * dt) *  cos(phi);;
+	F(0, 0) = 1; F(0, 1) = 0; F(0, 2) = (Acc.X * dt * dt + 0.5 * Acc.X * dt * dt) *  cos(phi);
 	F(1, 0) = 0; F(1, 1) = 1; F(1, 2) = (Acc.Y * dt * dt + 0.5 * Acc.Y * dt * dt) * -sin(phi);
 	F(2, 0) = 0; F(2, 1) = 0; F(2, 2) = 1;
 	// rest of A(which is just 2 null matrices and 1 identity) is added in new_state function

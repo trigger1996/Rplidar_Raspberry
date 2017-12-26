@@ -84,9 +84,9 @@ int __z_lidar::fuse_Obstacle()
 	int i, j, k;
 	bool is_matched[GROUP_MAX] = { false };
 
-	const int d_pt_eff_threshold = ANGLE_ALL / 5;		// 有效点数量差值	// ANGLE_ALL / 20
-	const float d_theta_threshold = 0.05f;				// 角度差值阈值	// 0.05f
-	const float d_rho_threshold = 15.0f;				// 距离差值阈值	// 15.0f
+	const int d_pt_eff_threshold = ANGLE_ALL / 10;		// 有效点数量差值	// ANGLE_ALL / 20
+	const float d_theta_threshold = 0.35f;				// 角度差值阈值	// 0.05f
+	const float d_rho_threshold = 20.0f;				// 距离差值阈值	// 15.0f
 
 	__obstacle_map      temp;
 	//__obstacle_line     line_t;
@@ -287,8 +287,9 @@ int __z_lidar::calc_OB_Centres_Measured()
 
 }// int __z_lidar::calc_OB_Centres_All()
 
-int __z_lidar::draw_Map()
+int __z_lidar::draw_Map(bool is_show)
 {
+	// 这边不能每次都clear
 
 	int i, j;
 	float theta;
@@ -318,10 +319,39 @@ int __z_lidar::draw_Map()
 		}
 	}
 
-	imshow("SLAM_Result", Map);
+	if (is_show == true)
+		imshow("SLAM_Result", Map);
 
 	return SUCCESS;
 
 }// int __z_lidar::draw_Map()
 
+int __z_lidar::update_Position_on_Map(__point2f input, float yaw, bool is_show)
+{
+	// input, 单位: m
+
+	__pos temp;
+	temp.X = StartPos.X + input.X * 1000.0f;	// mm->m
+	temp.Y = StartPos.Y + input.Y * 1000.0f;
+	temp.Yaw = yaw;
+
+	Pos_Last_2 = Pos_Last;
+	Pos_Last   = Pos;
+	Pos        = temp;
+
+	int x_map, y_map;
+
+	// 本次位置
+	x_map = Pos.X * PlainMap_Scale;
+	y_map = Pos.Y * PlainMap_Scale;
+	circle(Map, Point(x_map, y_map), 2, Scalar(0, 125, 255), -1, 8, 0);
+
+	// 上次位置
+	x_map = Pos_Last.X * PlainMap_Scale;
+	y_map = Pos.Y * PlainMap_Scale;
+	circle(Map, Point(x_map, y_map), 2, Scalar(0, 125, 255), -1, 8, 0);
+
+	return SUCCESS;
+
+}// int __z_lidar::update_Position_on_Map(bool is_show)
 

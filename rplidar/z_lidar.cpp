@@ -17,7 +17,7 @@ int __z_lidar::calc_Lidar(float freq)
 
 	calc_OB_Centres_Measured();		//  计算所有障碍物的代替点，用一个点代替一组障碍物用于定位
 
-	draw_Map();						// 画出来整张图
+	//draw_Map(true);						// 画出来整张图
 
 	return SUCCESS;
 
@@ -287,8 +287,9 @@ int __z_lidar::calc_OB_Centres_Measured()
 
 }// int __z_lidar::calc_OB_Centres_All()
 
-int __z_lidar::draw_Map()
+int __z_lidar::draw_Map(bool is_show)
 {
+	// 这边不能每次都clear
 
 	int i, j;
 	float theta;
@@ -318,10 +319,42 @@ int __z_lidar::draw_Map()
 		}
 	}
 
-	imshow("SLAM_Result", Map);
+	if (is_show == true)
+		imshow("SLAM_Result", Map);
 
 	return SUCCESS;
 
 }// int __z_lidar::draw_Map()
 
+int __z_lidar::update_Position_on_Map(__point2f input, float yaw, bool is_show)
+{
+	// input, 单位: m
+
+	__pos temp;
+	temp.X = StartPos.X + input.X * 1000.0f;	// mm->m
+	temp.Y = StartPos.Y + input.Y * 1000.0f;
+	temp.Yaw = yaw;
+
+	Pos_Last_2 = Pos_Last;
+	Pos_Last   = Pos;
+	Pos        = temp;
+
+	int x_map, y_map;
+
+	// 本次位置
+	x_map = Pos.X * PlainMap_Scale;
+	y_map = Pos.Y * PlainMap_Scale;
+	circle(Map, Point(x_map, y_map), 2, Scalar(0, 125, 255), -1, 8, 0);
+
+	// 上次位置
+	x_map = Pos_Last.X * PlainMap_Scale;
+	y_map = Pos_Last.Y * PlainMap_Scale;
+	circle(Map, Point(x_map, y_map), 2, Scalar(255, 125, 0), -1, 8, 0);
+
+	if (is_show == true)
+		imshow("SLAM_Result", Map);
+
+	return SUCCESS;
+
+}// int __z_lidar::update_Position_on_Map(bool is_show)
 

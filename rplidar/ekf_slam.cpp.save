@@ -27,7 +27,7 @@ int __ekf_slam::run(bool is_updated)
 
 	// 进行协方差的预测
 	// Calculate Jacobian A based on vehicle model(df / dx)
-	F(0, 0) = 1; F(0, 1) = 0; F(0, 2) = (Acc.X * dt * dt + 0.5 * Acc.X * dt * dt) *  cos(phi);;
+	F(0, 0) = 1; F(0, 1) = 0; F(0, 2) = (Acc.X * dt * dt + 0.5 * Acc.X * dt * dt) *  cos(phi);
 	F(1, 0) = 0; F(1, 1) = 1; F(1, 2) = (Acc.Y * dt * dt + 0.5 * Acc.Y * dt * dt) * -sin(phi);
 	F(2, 0) = 0; F(2, 1) = 0; F(2, 2) = 1;
 	// rest of A(which is just 2 null matrices and 1 identity) is added in new_state function
@@ -192,8 +192,6 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	// 输入传感器参数
 	//MatrixXd temp;
 
-	static double G = 9.8;
-
 	landmark_num_last = landmark_num;
 	landmark_num = lidar.size();
 	//numStates = lidar.size() + 3;
@@ -245,8 +243,11 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 
 	// 这边对做个处理，剪掉重力加速度在x轴和y轴的分量，然后对角度做个补偿，即加速度仅仅包含水平分量
 	// 那么重力怎么来呢？直接用9.8会有点不准，这边我们通过静止状态下的Z轴加速度得到
-	if (fabs()Pitch < 0.5f)
-	
+	if (fabs(Pitch) * 180.0 / PI < 0.5 &&
+		fabs(Roll)  * 180.0 / PI < 0.5 &&		// 确定平放
+		fabs(Vlct.Z) < 0.15f)					// 确定纵向静止
+        G = Acc.Z;
+
 	Acc.X = Acc.X - G * sin(Pitch);
 	Acc.X = Acc.X * cos(Pitch);
 	Acc.Y = Acc.Y - G * sin(Roll);

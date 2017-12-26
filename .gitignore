@@ -1,2 +1,4 @@
 *.save
+*.*.save
+*.cpp.save
 *.o

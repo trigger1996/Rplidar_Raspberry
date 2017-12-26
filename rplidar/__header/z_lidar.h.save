@@ -34,22 +34,24 @@ public:
 	vector<__obstacle_map>  OB_All;								// 所有障碍物的集合
 	float					 Freq;									// 频率
 
-	vector<__point2p> Landmark_Out;								//
+	vector<__point2p>			rGrid, rGrid_Last;					// 每组障碍物移动的相对坐标，注意这边的Yaw不用
+	vector<__point2p>			Landmark_Measured;
 
-
-	int obstacle_num;													// 有效的障碍物数量
+	int obstacle_num;												// 有效的障碍物数量
 
 
 	int update_LineGroup(vector<__obstacle_line> ob);
 
 	int calc_Lidar( float freq);		// 坐标和速度计算
 
-	int draw_Map();												// 作图
+	int draw_Map(bool is_show);									// 作图
+	int add_Track_to_Map(__point2f input, bool is_show);
 
 private:
 
 
 	int calc_OB_Centres_All();									// 计算坐标，所有障碍物都用一个landmark表示，计算其平均坐标
+	int calc_OB_Centres_Measured();
 	int fuse_Obstacle();										// 障碍物整合
 
 

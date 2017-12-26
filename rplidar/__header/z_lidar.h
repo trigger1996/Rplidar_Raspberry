@@ -44,7 +44,8 @@ public:
 
 	int calc_Lidar( float freq);		// 坐标和速度计算
 
-	int draw_Map();												// 作图
+	int draw_Map(bool is_show);									// 作图
+	int update_Position_on_Map(__point2f input, float yaw, bool is_show);
 
 private:
 
