@@ -259,7 +259,7 @@ int __obstacle_group::calc_Lines()
 
 	// 霍夫变换
 	vector<Vec2f> lines;
-	HoughLines(Img_Initial, lines, 0.5, CV_PI / 360 * 1.5, 32);	// 前面就跑过一次cvtColor了
+	HoughLines(Img_Initial, lines, 0.5, CV_PI / 360 * 2.0, 32);		// 前面就跑过一次cvtColor了
 																	// 返回直线坐标对 CV_PI / 360
 																	// Img, lines, 0.5, CV_PI / 360 * 15, 35
 	// 其实首先还是要对变量进行粗分组，这样得到大致的分组以后，然后进行一轮计算
@@ -488,19 +488,17 @@ int __obstacle_group::remove_Standlone_Pts()
 {
 	// 去掉多余的点
 	// 图像 + 几何手段
-	int x, y;
-
     Mat test = Img_Initial.clone();
 
 	GaussianBlur(test, test, Size(5, 5), 0, 0);
-	threshold(test, test, 255 * 0.65f, 255, CV_THRESH_BINARY);
+	threshold(test, test, 255 * 0.60f, 255, CV_THRESH_BINARY);		// 255 * 0.65f
 	//imshow("test", test);
 
-	// 这边用类似画图的方法去查点，如果查到的点在滤波后
+	// 这边用类似画图的方法去查点，如果查到的点在滤波后的图上不存在，则可以认为这个点是孤i点，可以被去掉
 	int x, y;
 	double theta, rho;
-	int halfWidth = Img_Initial.cols / 2;
-	int halfHeight = Img_Initial.rows / 2;
+	int halfWidth = test.cols / 2;
+	int halfHeight = test.rows / 2;
 
 	for (unsigned int i = 0; i < ANGLE_ALL; i++)	// scan_data.size()
 	{
@@ -516,11 +514,13 @@ int __obstacle_group::remove_Standlone_Pts()
 		if ((x >= 0 && x < LidarImageWidth) &&
 			(y >= 0 && y < LidarImageHeight))		// 检查这些点在不在图内
 		{
+			// 如果这个点在实际的图上不存在，则把这个点去掉
 			if (test.at<uchar>(y, x) == 0)
-
+				Data[i] = 0;
 		}
 	}
 
+	// 注意，这边把图回传，以增加霍夫变换的识别率
 	return SUCCESS;
 
 }// int __obstacle_group::remove_Standlone_Pts()

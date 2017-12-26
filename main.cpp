@@ -50,7 +50,9 @@ int main(int argc, char *argv[]) {
 	const char * opt_com_path = NULL;
 	_u32         opt_com_baudrate = 115200;
 	u_result     op_result;
-	int Yaw = 0;
+	float Pitch = 0;
+	float Roll = 0;
+	float Yaw = 0;
 
 	Mat kalman;
 
@@ -60,6 +62,7 @@ int main(int argc, char *argv[]) {
 	__z_lidar Z;
 	__ekf_slam EKF;
 
+	timeval t, t_last;
 
 	// OpenCV测试
 	//Mat hk416 = imread("hk416.jpg");
@@ -180,8 +183,17 @@ int main(int argc, char *argv[]) {
 			Z.update_LineGroup(OG.OLines);
 			Z.calc_Lidar(frequency);
 
-			EKF.get_Sensor(Z.rGrid, Pix_Link.Acc, Pix_Link.W, Yaw, 1 / frequency);
-			EKF.run();
+			// 获得时间
+			t_last = t;
+			gettimeofday(&t, NULL);
+			float dt = (t.tv_usec - t_last.tv_usec) / 1000000.0f;
+			if (dt < 0)
+				dt = (t.tv_usec + 1000000.0f - t_last.tv_usec) / 1000000.0f;
+			//cout << "dt: " << dt << endl;
+
+			EKF.get_Sensors(Z.rGrid, Pix_Link.Acc, Pix_Link.W, Pix_Link.V,
+							Pitch, Roll, Yaw, dt);
+			EKF.run(true);
 
 
 			i = 0;			// 知道这里有个bug，不管了
@@ -189,6 +201,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		Pix_Link.get_Data();
+		Pitch = Pix_Link.Eular_Angle.Pitch;
+		Roll = Pix_Link.Eular_Angle.Roll;
 		Yaw = Pix_Link.Eular_Angle.Yaw;
 
 		i++;

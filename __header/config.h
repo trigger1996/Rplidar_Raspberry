@@ -186,15 +186,20 @@ typedef struct
 
 typedef struct
 {
-	float r;
-	float deg;
-
+	double r;
+	double deg;
 } __point2p;
 
 typedef struct
 {
-	float X;
-	float Y;
-	float Z;
+	double r;
+	double rad;
 
+} __point2p_rad;
+
+typedef struct
+{
+	double X;
+	double Y;
+	double Z;
 } __Vec3f;

@@ -2,6 +2,8 @@
 
 #define __EKF_SLAM_H
 
+#include "config.h"
+
 #include <iostream>
 #include <cmath>
 #include <math.h>
@@ -9,14 +11,12 @@
 #include <stdio.h>
 #include <Eigen/Dense>
 
-// http://eigen.tuxfamily.org/dox/GettingStarted.html#title2
-// https://www.cnblogs.com/goingupeveryday/p/5699053.html
-
 using namespace std;
 using Eigen::MatrixXd;
-using Eigen::MatrixXf;
+using Eigen::MatrixXd;
 
-#define PI 3.1415926535897932384626
+//#define PI 3.1415926f
+
 
 class __ekf_slam
 {
@@ -24,32 +24,39 @@ public:
 
 	__ekf_slam();
 
-	int get_Sensor(vector<__point2p> lidar, __Vec3f a, __Vec3f w, float yaw);
-	int run();
-
+	int get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec, double yaw, double t);
+	int run(bool is_updated);
 
 private:
 
-	MatrixXd Xe, X;				// 观测值
-	MatrixXd Pe, P;				// 协方差
+	MatrixXd Xe, X, Xe_Last;
+	MatrixXd Pe, P;
+	MatrixXd Z,  innov;
+	MatrixXd H;
 
-	MatrixXd K;					// 卡尔曼增益
+	MatrixXd F, W, R;			// F->A
+	MatrixXd Q, V;
 
-	MatrixXd F, Jh, W, V;		// 过程变量
-	MatrixXd Q, R;				// 过程噪声和观测噪声
+	MatrixXd Jh;
+	MatrixXd K;
 
-	MatrixXd H;					// 传感器模型，这边用Xe去掉前面三项带入
+	__Vec3f Acc, Gyro;
+	__Vec3f Vlct;
 
-	MatrixXd Z;			// 传感器输入
+	double phi;			// Yaw
+	double dt;			// 时间, 单位: s
+	double Time;		// 总时间, 单位: s
 
+	int numStates;
 	int landmark_num, landmark_num_last;
 
-	float phi;			// Yaw
-	__Vec3f Acc;
-	__Vec3f Gyro;
+	int new_State(__point2p_rad z_lidar);
+	int update_New(__point2p_rad z);
+	int update_Existing(__point2p_rad z, int landmark);
 
-	float dt;			// 单位: s
+	double normalize_Angle(double in);
 
 };
+
 
 #endif // __EKF_SLAM_H

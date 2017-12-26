@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
 	__z_lidar Z;
 	__ekf_slam EKF;
 
+	timeval t, t_last;
 
 	// OpenCV测试
 	//Mat hk416 = imread("hk416.jpg");
@@ -180,8 +181,15 @@ int main(int argc, char *argv[]) {
 			Z.update_LineGroup(OG.OLines);
 			Z.calc_Lidar(frequency);
 
-			EKF.get_Sensor(Z.rGrid, Pix_Link.Acc, Pix_Link.W, Yaw);
-			EKF.run();
+			t_last = t;
+			gettimeofday(t, NULL);
+			float dt = (t.tv_usec - t_last.tv_usec) / 1000000.0f;
+			if (dt < 0)
+				dt = (t.tv_usec - t_last.tv_usec) / 1000000.0f;
+
+			EKF.get_Sensors(Z.rGrid, Pix_Link.Acc, Pix_Link.W, Yaw, 1 / frequency);
+			EKF.run(true);
+
 
 			i = 0;			// 知道这里有个bug，不管了
 			waitKey(30);
