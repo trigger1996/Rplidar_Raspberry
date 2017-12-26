@@ -38,7 +38,7 @@ int __ekf_slam::run(bool is_updated)
 	{
 		int i;
 
-		for (i = 3; i < landmark_num; i++)		// i = 0; i < landmark_num; i++
+		for (i = 3; i < landmark_num; i++)		// i = 0; i < landmark_num; i++	取i = 0或者i = 1容易发散
 		{
 			// z.r == 0则不要计算了
 			if (Z(2 * i, 0) == 0)
@@ -94,7 +94,23 @@ int __ekf_slam::run(bool is_updated)
 					//z_lidar.r = Z(2 * i, 0);
 					//z_lidar.rad = Z(2 * i + 1, 0);
 
-					update_Existing(z_lidar, i);
+					// 这边做个调整，用最小的那个作为激光雷达的刷新点
+					int min_dst_seq = 0;
+					for (int j = 0; j < landmark_num; j++)
+					{
+						// 找到距离最小的点
+                        if (Z(2 * min_dst_seq, 0) > Z(2 * j, 0) &&
+							Z(2 * j, 0) != 0)
+							min_dst_seq = j;
+					}
+					if (min_dst_seq <= 0)
+						return 0;									// 如果得不到数据则放弃
+
+					z_lidar.r = Z(2 * min_dst_seq, 0);				// 2 * landmark_num - 2
+					z_lidar.rad = Z(2 * min_dst_seq + 1, 0);		// 2 * landmark_num - 2 + 1
+					update_Existing(z_lidar, min_dst_seq);
+
+					return 0;
 				}
 			}
 		}

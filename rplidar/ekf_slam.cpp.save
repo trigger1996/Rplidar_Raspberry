@@ -38,7 +38,7 @@ int __ekf_slam::run(bool is_updated)
 	{
 		int i;
 
-		for (i = 3; i < landmark_num; i++)		// i = 0; i < landmark_num; i++
+		for (i = 0; i < landmark_num; i++)		// i = 3; i < landmark_num; i++
 		{
 			// z.r == 0则不要计算了
 			if (Z(2 * i, 0) == 0)
@@ -94,7 +94,25 @@ int __ekf_slam::run(bool is_updated)
 					//z_lidar.r = Z(2 * i, 0);
 					//z_lidar.rad = Z(2 * i + 1, 0);
 
+					// 这边做个调整，用最小的那个作为激光雷达的刷新点
+					int min_dst_seq = 0;
+					for (int j = 0; j < landmark_num; j++)
+					{
+						// 找到距离最小的点
+                        if (Z(2 * min_dst_seq, 0) > Z(2 * j, 0) &&
+							Z(2 * j, 0) != 0)
+							min_dst_seq = j;
+					}
+					if (min_dst_seq <= 0)
+					
+					else
+					{
+					z_lidar.r = Z(2 * min_dst_seq, 0);				// 2 * landmark_num - 2
+					z_lidar.rad = Z(2 * min_dst_seq + 1, 0);		// 2 * landmark_num - 2 + 1
+					}
 					update_Existing(z_lidar, i);
+
+					break;
 				}
 			}
 		}
@@ -177,7 +195,7 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	Acc.Y = a.Y;
 	Acc.Z = a.Z;
 
-	cout << "Acc.X:" << Acc.X << " " << "Acc.Y:" << Acc.Y << endl;
+	//cout << "Acc.X:" << Acc.X << " " << "Acc.Y:" << Acc.Y << endl;
 
 	// 角速度
 	Gyro.X = w.X;
@@ -202,7 +220,10 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	// 这边对做个处理，剪掉重力加速度在x轴和y轴的分量，然后对角度做个补偿，即加速度仅仅包含水平分量
 	Acc.X = Acc.X - G * sin(Pitch);
 	Acc.X = Acc.X * cos(Pitch);
-	Acc.Y = a.Y;
+	Acc.Y = Acc.Y - G * sin(Roll);
+	Acc.Y = Acc.Y * cos(Roll);
+
+	cout << "Acc.X:" << Acc.X << " " << "Acc.Y:" << Acc.Y << endl;
 
 	dt = t;
 
