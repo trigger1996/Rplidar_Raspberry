@@ -124,8 +124,8 @@ int __ekf_slam::run(bool is_updated)
 				init();
 
 				// 只要上一次数据没问题，则用上一次的数据来作为位置，这样避免位置重置
-				if (isNaN(Xe_Last(0, 0)) == false &&
-					isNan(Xe_Last(1, 0)) == false)
+				if (is_nan(Xe_Last(0, 0)) == false &&
+					is_nan(Xe_Last(1, 0)) == false)
                     Xe = Xe_Last;
 			}
 		}
@@ -140,6 +140,8 @@ __ekf_slam::__ekf_slam()
 {
 	// 这边多加了一个init()其实主要是考虑重置滤波器的，不然初始化直接写构造函数里面就行了
 	init();
+
+	G = 9.8f;		// 这个可以写init()外面
 
 }// __ekf_slam::__ekf_slam()
 
@@ -190,7 +192,7 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	// 输入传感器参数
 	//MatrixXd temp;
 
-	const double G = 9.8;
+	static double G = 9.8;
 
 	landmark_num_last = landmark_num;
 	landmark_num = lidar.size();
@@ -242,6 +244,9 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	cout << "Pitch: " << Pitch << " Roll: " << Roll << " Yaw: " << phi << endl;
 
 	// 这边对做个处理，剪掉重力加速度在x轴和y轴的分量，然后对角度做个补偿，即加速度仅仅包含水平分量
+	// 那么重力怎么来呢？直接用9.8会有点不准，这边我们通过静止状态下的Z轴加速度得到
+	if (fabs()Pitch < 0.5f)
+	
 	Acc.X = Acc.X - G * sin(Pitch);
 	Acc.X = Acc.X * cos(Pitch);
 	Acc.Y = Acc.Y - G * sin(Roll);
@@ -430,9 +435,13 @@ int __ekf_slam::update_New(__point2p_rad z)
 	current_Pos.X = Xe(0, 0);
 	current_Pos.Y = Xe(1, 0);
 
-	// 这里的-5是用来判断滤波器
+	// 这里的-5是用来判断滤波器是否整个爆炸的，如果爆炸了则重置
+	// 下同
 	if (is_nan(Pe(0, 0)) == true)
+	{
+		//init();
 		return -5;
+	}
 
 	return 0;
 
@@ -541,8 +550,12 @@ int __ekf_slam::update_Existing(__point2p_rad z, int landmark)
 	current_Pos.X = Xe(0, 0);
 	current_Pos.Y = Xe(1, 0);
 
+	// 如果滤波器爆炸了则重置
 	if (is_nan(Pe(0, 0)) == true)
+	{
+		init();
 		return -5;
+	}
 
 	return 0;
 
@@ -565,6 +578,7 @@ double __ekf_slam::normalize_Angle(double in)
 
 bool is_nan(double dval)
 {
+	// 判断一个数是不是NaN
 	if (dval == dval)
 		return false;
 	else

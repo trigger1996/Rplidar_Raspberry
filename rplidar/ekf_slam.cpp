@@ -141,6 +141,8 @@ __ekf_slam::__ekf_slam()
 	// 这边多加了一个init()其实主要是考虑重置滤波器的，不然初始化直接写构造函数里面就行了
 	init();
 
+	G = 9.8f;		// 这个可以写init()外面
+
 }// __ekf_slam::__ekf_slam()
 
 int __ekf_slam::init()
@@ -189,8 +191,6 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 {
 	// 输入传感器参数
 	//MatrixXd temp;
-
-	const double G = 9.8;
 
 	landmark_num_last = landmark_num;
 	landmark_num = lidar.size();
@@ -242,6 +242,12 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	cout << "Pitch: " << Pitch << " Roll: " << Roll << " Yaw: " << phi << endl;
 
 	// 这边对做个处理，剪掉重力加速度在x轴和y轴的分量，然后对角度做个补偿，即加速度仅仅包含水平分量
+	// 那么重力怎么来呢？直接用9.8会有点不准，这边我们通过静止状态下的Z轴加速度得到
+	if (fabs(Pitch) * 180.0 / PI < 0.5 &&
+		fabs(Roll)  * 180.0 / PI < 0.5 &&		// 确定平放
+		fabs(Vlct.Z) < 0.15f)					// 确定纵向静止
+        G = Acc.Z;
+
 	Acc.X = Acc.X - G * sin(Pitch);
 	Acc.X = Acc.X * cos(Pitch);
 	Acc.Y = Acc.Y - G * sin(Roll);

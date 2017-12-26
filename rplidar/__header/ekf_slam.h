@@ -45,11 +45,12 @@ private:
 
 	__Vec3f Acc, Gyro;
 	__Vec3f Vlct;
+	double G;				// 重力加速度
 
 	double Pitch, Roll;
 	double phi;			// Yaw
-	double dt;			// 时间, 单位: s
-	double Time;		// 总时间, 单位: s
+	double dt;				// 时间, 单位: s
+	double Time;			// 总时间, 单位: s
 
 	int numStates;
 	int landmark_num, landmark_num_last;
