@@ -5,9 +5,12 @@ int __ekf_slam::run(bool is_updated)
 	// 这个函数跟get_Sensor()放一起，都放在lidar刷新的标志位内
 	// 所以不用像Matlab里面一样等待刷新
 	// 但是这边还是写吧，强迫症，提醒自己这个东西该怎么用
+	int stat = 0;
 
 	// 备份上一时刻的状态
 	Xe_Last = Xe;
+	// 打印姿态
+	cout << "X: " << Xe(0, 0) << " Y: " << Xe(1, 0)<< endl;
 
 	// 预测位置，注意，这边换了模型
 	// 这边是因为偏航角锁了，然后模型的X和Y换了，所以算法不一样了
@@ -38,7 +41,7 @@ int __ekf_slam::run(bool is_updated)
 	{
 		int i;
 
-		for (i = 0; i < landmark_num; i++)		// i = 3; i < landmark_num; i++
+		for (i = 0; i < landmark_num; i++)		// i = 0; i < landmark_num; i++	取i = 0或者i = 1容易发散
 		{
 			// z.r == 0则不要计算了
 			if (Z(2 * i, 0) == 0)
@@ -57,7 +60,7 @@ int __ekf_slam::run(bool is_updated)
 				// 这里工程手段直接解决
 				new_State(z_lidar);
 				numStates = numStates + 2;			// increase number of states by 2 (1 for xi, 1 for yi)
-				update_New(z_lidar);
+				stat = update_New(z_lidar);
 
 			}
 			else
@@ -84,7 +87,7 @@ int __ekf_slam::run(bool is_updated)
 					// 如果是多出来的这一部分则认为是新的
 					new_State(z_lidar);								// add new state(i.e.increase all matrix sizes)
 					numStates = numStates + 2;						// increase number of states by 2 (1 for xi, 1 for yi)
-					update_New(z_lidar);							// update state and covariance
+					stat = update_New(z_lidar);						// update state and covariance
 				}
 				else
 				{
@@ -104,16 +107,26 @@ int __ekf_slam::run(bool is_updated)
 							min_dst_seq = j;
 					}
 					if (min_dst_seq <= 0)
-					
-					else
-					{
+						return 0;									// 如果得不到数据则放弃
+
 					z_lidar.r = Z(2 * min_dst_seq, 0);				// 2 * landmark_num - 2
 					z_lidar.rad = Z(2 * min_dst_seq + 1, 0);		// 2 * landmark_num - 2 + 1
-					}
-					update_Existing(z_lidar, i);
+					stat = update_Existing(z_lidar, min_dst_seq);
 
-					break;
+					if (stat == 0)
+						return 0;
 				}
+			}
+
+			// 这个部分是预留着用于重置卡尔曼滤波器的，因为有时候会出现NaN，这个时候就需要重置整个卡尔曼滤波器
+			if (stat == -5)
+			{
+				init();
+
+				// 只要上一次数据没问题，则用上一次的数据来作为位置，这样避免位置重置
+				if (isNaN(Xe_Last(0, 0)) == false &&
+					isNan(Xe_Last(1, 0)) == false)
+                    Xe = Xe_Last;
 			}
 		}
 	}
@@ -124,6 +137,13 @@ int __ekf_slam::run(bool is_updated)
 }// int __ekf_slam::run()
 
 __ekf_slam::__ekf_slam()
+{
+	// 这边多加了一个init()其实主要是考虑重置滤波器的，不然初始化直接写构造函数里面就行了
+	init();
+
+}// __ekf_slam::__ekf_slam()
+
+int __ekf_slam::init()
 {
 	Xe.resize(3, 1);
 	Xe.setZero();
@@ -158,7 +178,11 @@ __ekf_slam::__ekf_slam()
 	landmark_num_last = landmark_num = 0;
 	numStates = 3;											// 可以理解为Xe的行数，Xe.rows()
 
-}// __ekf_slam::__ekf_slam()
+	current_Pos.X = current_Pos.Y = 0.0f;
+
+	return 0;
+
+}// int __ekf_slam::init()
 
 
 int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec3f v, double pitch, double roll, double yaw, double t)
@@ -403,6 +427,13 @@ int __ekf_slam::update_New(__point2p_rad z)
 	cout << "K * Jh: " << endl << K * Jh << endl;
 	cout << "P_out:" << endl << Pe << endl;
 
+	current_Pos.X = Xe(0, 0);
+	current_Pos.Y = Xe(1, 0);
+
+	// 这里的-5是用来判断滤波器
+	if (is_nan(Pe(0, 0)) == true)
+		return -5;
+
 	return 0;
 
 }// int __ekf_slam::update_New(__point2p_rad z)
@@ -507,6 +538,12 @@ int __ekf_slam::update_Existing(__point2p_rad z, int landmark)
 
 	cout << "p_out:" << endl << Pe << endl;
 
+	current_Pos.X = Xe(0, 0);
+	current_Pos.Y = Xe(1, 0);
+
+	if (is_nan(Pe(0, 0)) == true)
+		return -5;
+
 	return 0;
 
 }// int __ekf_slam::update_Existing(__point2p_rad z, int landmark)
@@ -525,3 +562,11 @@ double __ekf_slam::normalize_Angle(double in)
 	return  in;
 
 }// int __ekf_slam::normalize_Angle()
+
+bool is_nan(double dval)
+{
+	if (dval == dval)
+		return false;
+	else
+		return true;
+}// bool is_nan(double dval)

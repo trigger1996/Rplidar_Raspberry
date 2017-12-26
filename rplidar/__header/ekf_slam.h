@@ -17,12 +17,15 @@ using Eigen::MatrixXd;
 
 //#define PI 3.1415926f
 
+bool is_nan(double dval);
 
 class __ekf_slam
 {
 public:
 
 	__ekf_slam();
+
+	__point2f current_Pos;
 
 	int get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec3f v, double pitch, double roll, double yaw, double t);
 	int run(bool is_updated);
@@ -50,6 +53,8 @@ private:
 
 	int numStates;
 	int landmark_num, landmark_num_last;
+
+	int init();
 
 	int new_State(__point2p_rad z_lidar);
 	int update_New(__point2p_rad z);
