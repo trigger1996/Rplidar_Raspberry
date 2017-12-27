@@ -259,7 +259,7 @@ int __obstacle_group::calc_Lines()
 
 	// 霍夫变换
 	vector<Vec2f> lines;
-	HoughLines(Img_Initial, lines, 0.5, CV_PI / 360 * 2.0, 32);		// 前面就跑过一次cvtColor了
+	HoughLines(Img_Initial, lines, 0.5, CV_PI / 180 * 5.0, 50);		// 前面就跑过一次cvtColor了
 																	// 返回直线坐标对 CV_PI / 360
 																	// Img, lines, 0.5, CV_PI / 360 * 15, 35
 	// 其实首先还是要对变量进行粗分组，这样得到大致的分组以后，然后进行一轮计算

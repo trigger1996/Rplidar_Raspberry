@@ -30,6 +30,7 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-O" />
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 			<Add directory="__header" />

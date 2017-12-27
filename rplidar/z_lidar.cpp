@@ -85,8 +85,8 @@ int __z_lidar::fuse_Obstacle()
 	bool is_matched[GROUP_MAX] = { false };
 
 	const int d_pt_eff_threshold = ANGLE_ALL / 10;		// 有效点数量差值	// ANGLE_ALL / 20
-	const float d_theta_threshold = 0.35f;				// 角度差值阈值	// 0.05f
-	const float d_rho_threshold = 20.0f;				// 距离差值阈值	// 15.0f
+	const float d_theta_threshold = 0.45f;				// 角度差值阈值	// 0.05f
+	const float d_rho_threshold = 25.0f;				// 距离差值阈值	// 15.0f
 
 	__obstacle_map      temp;
 	//__obstacle_line     line_t;

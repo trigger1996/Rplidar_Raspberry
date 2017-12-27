@@ -464,7 +464,7 @@ int __ekf_slam::update_Existing(__point2p_rad z, int landmark)
 		return -1;
 	z.rad = normalize_Angle(z.rad);
 
-	cout << "233:    " << landmark << endl;
+	cout << "233:    " << landmark << endl;	// 这个还不能删掉，删掉会导致代码直接爆炸
 	cout << "Xe.rows(): " << Xe.rows() << endl;
 
 	dx = Xe(landmark, 0)     - Xe(0, 0);	// distance between existing landmark and x - pos of vehicle
