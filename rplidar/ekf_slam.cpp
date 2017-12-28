@@ -47,6 +47,8 @@ int __ekf_slam::run(bool is_updated)
 			if (Z(2 * i, 0) == 0)
 				continue;
 
+			cout << "start calculating..." << endl << "displaying: " << endl;
+
 
 			if (numStates == 3)
 			{
@@ -252,6 +254,9 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	Acc.X = Acc.X * cos(Pitch);
 	Acc.Y = Acc.Y - G * sin(Roll);
 	Acc.Y = Acc.Y * cos(Roll);
+
+
+	// 后面发现这样也是不准的，因为飞的时候是重力和升力的合力
 
 	cout << "Acc.X:" << Acc.X << " " << "Acc.Y:" << Acc.Y << endl;
 

@@ -157,7 +157,13 @@ int main(int argc, char *argv[]) {
 
 		op_result = drv->grabScanData(nodes, count);
 
-		if (IS_OK(op_result)) {
+		Pix_Link.get_Data();
+		Pitch = Pix_Link.Eular_Angle.Pitch;
+		Roll = Pix_Link.Eular_Angle.Roll;
+		Yaw = Pix_Link.Eular_Angle.Yaw;
+
+		if (IS_OK(op_result))
+		{
 			float frequency = 0;
 
 			// 读取数据
@@ -199,14 +205,9 @@ int main(int argc, char *argv[]) {
 			Z.draw_Map(false);
 			Z.update_Position_on_Map(EKF.current_Pos, Yaw, true);
 
-			i = 0;			// 知道这里有个bug，不管了
-			waitKey(30);
+			//i = 0;			// 知道这里有个bug，不管了
+			waitKey(25);	// 30
 		}
-
-		Pix_Link.get_Data();
-		Pitch = Pix_Link.Eular_Angle.Pitch;
-		Roll = Pix_Link.Eular_Angle.Roll;
-		Yaw = Pix_Link.Eular_Angle.Yaw;
 
 		i++;
 		//usleep(50000);		// 50ms

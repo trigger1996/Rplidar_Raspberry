@@ -157,7 +157,9 @@ int main(int argc, char *argv[]) {
 
 		op_result = drv->grabScanData(nodes, count);
 
-		if (IS_OK(op_result)) {
+		if (IS_OK(op_result) &&
+			i % 3 == 0) 		// 降低读取速率，激光雷达和IMU的读取速率1:3
+		{
 			float frequency = 0;
 
 			// 读取数据
@@ -197,10 +199,10 @@ int main(int argc, char *argv[]) {
 
 			// 打印结果
 			Z.draw_Map(false);
-			Z.update_Position_on_Map()
-			
-			i = 0;			// 知道这里有个bug，不管了
-			waitKey(30);
+			Z.update_Position_on_Map(EKF.current_Pos, Yaw, true);
+
+			//i = 0;			// 知道这里有个bug，不管了
+			waitKey(25);	// 30
 		}
 
 		Pix_Link.get_Data();

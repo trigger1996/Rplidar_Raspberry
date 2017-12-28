@@ -46,6 +46,8 @@ int __ekf_slam::run(bool is_updated)
 			// z.r == 0则不要计算了
 			if (Z(2 * i, 0) == 0)
 				continue;
+				
+			c
 
 
 			if (numStates == 3)
@@ -248,14 +250,13 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 		fabs(Vlct.Z) < 0.15f)					// 确定纵向静止
         G = Acc.Z;
 
-	Acc.X -= G * sin(Pitch);
-	Acc.X *= G * cos(Pitch);
-	Acc.Y *= G * 
-
 	Acc.X = Acc.X - G * sin(Pitch);
 	Acc.X = Acc.X * cos(Pitch);
 	Acc.Y = Acc.Y - G * sin(Roll);
 	Acc.Y = Acc.Y * cos(Roll);
+
+
+	// 后面发现这样也是不准的，因为飞的时候是重力和升力的合力
 
 	cout << "Acc.X:" << Acc.X << " " << "Acc.Y:" << Acc.Y << endl;
 
@@ -468,11 +469,14 @@ int __ekf_slam::update_Existing(__point2p_rad z, int landmark)
 		return -1;
 	z.rad = normalize_Angle(z.rad);
 
+	cout << "233:    " << landmark << endl;	// 这个还不能删掉，删掉会导致代码直接爆炸
 	cout << "Xe.rows(): " << Xe.rows() << endl;
 
 	dx = Xe(landmark, 0)     - Xe(0, 0);	// distance between existing landmark and x - pos of vehicle
 	dy = Xe(landmark + 1, 0) - Xe(1, 0);	// distance between existing landmark and x - pos of vehicle
 	r = sqrt(dx*dx + dy*dy);
+
+	cout << "2333333" << endl;
 
 	// Sensor Model - range and bearing
 	H.resize(2, 1);
