@@ -367,14 +367,12 @@
 		<Unit filename="main.cpp" />
 		<Unit filename="pixhawk_imu/datalink.cpp" />
 		<Unit filename="pixhawk_imu/datalink.h" />
+		<Unit filename="rplidar/__header/cv_match.h" />
 		<Unit filename="rplidar/__header/ekf_slam.h" />
 		<Unit filename="rplidar/__header/lidar_image.h" />
-		<Unit filename="rplidar/__header/obstacle.h" />
-		<Unit filename="rplidar/__header/position.h" />
-		<Unit filename="rplidar/__header/z_lidar.h" />
+		<Unit filename="rplidar/cv_match.cpp" />
 		<Unit filename="rplidar/ekf_slam.cpp" />
 		<Unit filename="rplidar/lidar_image.cpp" />
-		<Unit filename="rplidar/obstacle.cpp" />
 		<Unit filename="rplidar/sdk/include/rplidar.h" />
 		<Unit filename="rplidar/sdk/include/rplidar_cmd.h" />
 		<Unit filename="rplidar/sdk/include/rplidar_driver.h" />
@@ -395,7 +393,6 @@
 		<Unit filename="rplidar/sdk/src/rplidar_driver.cpp" />
 		<Unit filename="rplidar/sdk/src/rplidar_driver_serial.h" />
 		<Unit filename="rplidar/sdk/src/sdkcommon.h" />
-		<Unit filename="rplidar/z_lidar.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

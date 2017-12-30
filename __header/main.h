@@ -14,11 +14,9 @@
 #include "datalink.h"
 
 #include "lidar_image.h"
-#include "obstacle.h"
-#include "z_lidar.h"
+#include "cv_match.h"
 
 #include "ekf_slam.h"
-//#include "tinyslam.h"
 
 using namespace std;
 using namespace cv;

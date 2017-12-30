@@ -54,12 +54,10 @@ int main(int argc, char *argv[]) {
 	float Roll = 0;
 	float Yaw = 0;
 
-	Mat kalman;
 
 	// 处理类
 	__lidar_img Lidar_Img;
-	__obstacle_group OG;
-	__z_lidar Z;
+	__cv_match Match;
 	__ekf_slam EKF;
 
 	timeval t, t_last;
@@ -157,15 +155,18 @@ int main(int argc, char *argv[]) {
 
 		op_result = drv->grabScanData(nodes, count);
 
-		if (IS_OK(op_result) &&
-			i % 3 == 0) 		// 降低读取速率，激光雷达和IMU的读取速率1:3
+		Pix_Link.get_Data();
+		Pitch = Pix_Link.Eular_Angle.Pitch;
+		Roll = Pix_Link.Eular_Angle.Roll;
+		Yaw = Pix_Link.Eular_Angle.Yaw;
+
+		if (IS_OK(op_result))
 		{
 			float frequency = 0;
 
 			// 读取数据
 			drv->getFrequency(is_express, count, frequency, is_4k_mode);
 			Lidar_Img.scanData(nodes, count, frequency);
-			//Lidar_Img.Draw(Lidar_Img.Img_Dst_Raw, Lidar_Img.Data, "Raw");
 
 			// 数据角度归一化，预处理、滤波，计算速度
 			Lidar_Img.Normalize_Data(Lidar_Img.Data);
@@ -177,14 +178,6 @@ int main(int argc, char *argv[]) {
 			// 第一轮预处理结果
 			//Lidar_Img.Draw(kalman, Lidar_Img.Data_NArray, "Dst_Kalman");
 
-			// 建图
-			OG.get_Array(Lidar_Img.Data_NArray);
-			OG.draw();
-			OG.calc_Lines();
-			// 自制建图算法测试
-			Z.update_LineGroup(OG.OLines);
-			Z.calc_Lidar(frequency);
-
 			// 获得时间
 			t_last = t;
 			gettimeofday(&t, NULL);
@@ -193,22 +186,17 @@ int main(int argc, char *argv[]) {
 				dt = (t.tv_usec + 1000000.0f - t_last.tv_usec) / 1000000.0f;
 			//cout << "dt: " << dt << endl;
 
-			EKF.get_Sensors(Z.rGrid, Pix_Link.Acc, Pix_Link.W, Pix_Link.V,
-							Pitch, Roll, Yaw, dt);
-			EKF.run(true);
+			Match.set_Data(Lidar_Img.Data_NArray);
+			Match.run();
 
-			// 打印结果
-			Z.draw_Map(false);
-			Z.update_Position_on_Map(EKF.current_Pos, Yaw, true);
+			/EKF.get_Sensors(Z.rGrid, Pix_Link.Acc, Pix_Link.W, Pix_Link.V,
+			//				Pitch, Roll, Yaw, dt);
+			//EKF.run(true);
+
 
 			//i = 0;			// 知道这里有个bug，不管了
 			waitKey(25);	// 30
 		}
-
-		Pix_Link.get_Data();
-		Pitch = Pix_Link.Eular_Angle.Pitch;
-		Roll = Pix_Link.Eular_Angle.Roll;
-		Yaw = Pix_Link.Eular_Angle.Yaw;
 
 		i++;
 		//usleep(50000);		// 50ms

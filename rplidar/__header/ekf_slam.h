@@ -19,6 +19,13 @@ using Eigen::MatrixXd;
 
 bool is_nan(double dval);
 
+typedef struct
+{
+	__point2p_rad PosData;
+	__point2f Grid;
+	__point2f VehicleGrid_Recorded;
+} __landmark;
+
 class __ekf_slam
 {
 public:
@@ -55,7 +62,11 @@ private:
 	int numStates;
 	int landmark_num, landmark_num_last;
 
+	vector<__landmark> landmark;
+
 	int init();
+
+	int match_Landmark(vector<__point2p> lidar);
 
 	int new_State(__point2p_rad z_lidar);
 	int update_New(__point2p_rad z);

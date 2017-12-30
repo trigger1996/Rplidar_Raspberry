@@ -189,32 +189,13 @@ int __ekf_slam::init()
 }// int __ekf_slam::init()
 
 
+
 int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec3f v, double pitch, double roll, double yaw, double t)
 {
 	// 输入传感器参数
 	//MatrixXd temp;
 
-	landmark_num_last = landmark_num;
-	landmark_num = lidar.size();
-	//numStates = lidar.size() + 3;
-
-	//temp.resize(Z.rows(), Z.cols());
-	//temp = Z;
-	Z.resize(lidar.size() * 2, 1);
-	Z.setZero();
-
-
-	// 激光雷达参数
-	// 前次状态的保存的任务交给旧的建图和匹配模块，故这里无需关心，因为前一级已经处理好了
-	for (int i = 0, j = 0; i < Z.rows() - 1; i += 2, j++)
-	{
-		Z(i, 0) = lidar[j].r / 1000.0f;				// mm/s^2 -> m/s^2
-		Z(i + 1, 0) = lidar[j].deg * PI / 180.0f;
-	}
-
-	//for (int i = 0; i < lidar.size(); i++)
-	//	cout << "lidar.r: " << lidar[i].r << "lidar.deg: " << lidar[i].deg << endl;
-	cout << "Z: " << endl << Z << endl;
+	match_Landmark(lidar);
 
 	// 加速度
 	Acc.X = a.X;
@@ -233,7 +214,7 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	Vlct.Y = v.Y;
 	Vlct.Z = v.Z;
 
-	cout << "Vlct.X:" << Vlct.X << " " << "Vlct.Y" << Vlct.Y << endl;
+	//cout << "Vlct.X:" << Vlct.X << " " << "Vlct.Y" << Vlct.Y << endl;
 
 	Pitch = pitch * PI / 180.0f;
 	Roll  = roll * PI / 180.0f;
@@ -241,7 +222,7 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	// 偏航角
 	phi = yaw * PI / 180.0f;
 
-	cout << "Pitch: " << Pitch << " Roll: " << Roll << " Yaw: " << phi << endl;
+	//cout << "Pitch: " << Pitch << " Roll: " << Roll << " Yaw: " << phi << endl;
 
 	// 这边对做个处理，剪掉重力加速度在x轴和y轴的分量，然后对角度做个补偿，即加速度仅仅包含水平分量
 	// 那么重力怎么来呢？直接用9.8会有点不准，这边我们通过静止状态下的Z轴加速度得到
@@ -258,13 +239,118 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 
 	// 后面发现这样也是不准的，因为飞的时候是重力和升力的合力
 
-	cout << "Acc.X:" << Acc.X << " " << "Acc.Y:" << Acc.Y << endl;
+	//cout << "Acc.X:" << Acc.X << " " << "Acc.Y:" << Acc.Y << endl;
 
 	dt = t;
 
 	return 0;
 
 }// int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, double yaw, double t)
+
+int __ekf_slam::match_Landmark(vector<__point2p> lidar)
+{
+	// 输入和原有库进行比对，如果是新的则压栈
+	// 如果是旧的则不管
+
+	const double grid_threshold = 250.0f;	// 单位: mm, 250.0f
+
+	int i, j;
+	double dst_search, theta_search;
+	__point2f pt_search;
+	double dst, theta;
+	__point2f pt;
+	bool is_matched = false;
+
+	landmark_num_last = landmark_num;
+
+	for (i = 0; i < lidar.size(); i++)
+	{
+		dst_search = lidar[i].r;
+		theta_search = lidar[i].deg * PI / 180.0f;
+
+		pt_search.X = current_Pos.X + dst_search * sin(theta_search);
+		pt_search.Y = current_Pos.Y + dst_search * cos(theta_search);
+
+		is_matched = false;
+		for (j = 0; j < landmark.size(); j++)
+		{
+			// 用坐标点匹配
+			pt.X = landmark[j].Grid.X;
+			pt.Y = landmark[j].Grid.Y;
+
+			cout << j << ": " << endl;
+			cout << "fabs(pt_search.X - pt.X) " << fabs(pt_search.X - pt.X) << endl;
+			cout << "fabs(pt_search.Y - pt.Y) " << fabs(pt_search.Y - pt.Y) << endl;
+
+			if (fabs(pt_search.X - pt.X) <= grid_threshold &&
+				fabs(pt_search.Y - pt.Y) <= grid_threshold)
+			{
+				is_matched = true;
+				break;
+			}
+
+		}
+
+			if (is_matched == true)
+			{
+				// 如果是这个点则进行更新
+				// 用平均值的方法进行更新
+				landmark[j].PosData.r   = (landmark[j].PosData.r + dst_search) / 2;
+				landmark[j].PosData.rad = (landmark[j].PosData.rad + theta_search) / 2;
+
+				landmark[j].Grid.X = pt_search.X;
+				landmark[j].Grid.Y = pt_search.Y;
+
+				landmark[j].VehicleGrid_Recorded.X = current_Pos.X;
+				landmark[j].VehicleGrid_Recorded.Y = current_Pos.Y;
+
+			}
+			else
+			{
+				// 如果不是这个点则更新数据
+				__landmark temp;
+
+				temp.Grid.X = pt_search.X;
+				temp.Grid.Y = pt_search.Y;
+
+				temp.PosData.r   = dst_search;
+				temp.PosData.rad = theta_search;
+
+				temp.VehicleGrid_Recorded.X = current_Pos.X;
+				temp.VehicleGrid_Recorded.Y = current_Pos.Y;
+
+				landmark.push_back(temp);
+
+			}
+
+	}
+
+
+	landmark_num = landmark.size();
+	//numStates = landmark.size() + 3;
+
+	//temp.resize(Z.rows(), Z.cols());
+	//temp = Z;
+	Z.resize(landmark.size() * 2, 1);
+	Z.setZero();
+
+
+	// 激光雷达参数
+	// 前次状态的保存的任务交给旧的建图和匹配模块，故这里无需关心，因为前一级已经处理好了
+	for (int i = 0, j = 0; i < Z.rows() - 1; i += 2, j++)
+	{
+		Z(i, 0) = landmark[j].PosData.r / 1000.0f;				// mm/s^2 -> m/s^2
+		Z(i + 1, 0) = landmark[j].PosData.rad;
+	}
+
+	//for (int i = 0; i < lidar.size(); i++)
+	//	cout << "lidar.r: " << lidar[i].r << "lidar.deg: " << lidar[i].deg << endl;
+	 cout << "Z: " << endl << Z << endl;
+
+	return 0;
+
+}// int __ekf_slam::match_Landmark(vector<__point2p> lidar)
+
 
 int __ekf_slam::new_State(__point2p_rad z_lidar)
 {
