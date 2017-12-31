@@ -64,6 +64,8 @@ private:
 
 	vector<__landmark> landmark;
 
+	__point2p_rad nearby_pt;
+
 	int init();
 
 	int match_Landmark(vector<__point2p> lidar);
@@ -71,6 +73,8 @@ private:
 	int new_State(__point2p_rad z_lidar);
 	int update_New(__point2p_rad z);
 	int update_Existing(__point2p_rad z, int landmark);
+
+	int nearby_LMs();
 
 	double normalize_Angle(double in);
 

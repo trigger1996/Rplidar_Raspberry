@@ -7,6 +7,8 @@ int __ekf_slam::run(bool is_updated)
 	// 但是这边还是写吧，强迫症，提醒自己这个东西该怎么用
 	int stat = 0;
 
+	const float min_dist_threshold = 2.0f;
+
 	// 备份上一时刻的状态
 	Xe_Last = Xe;
 	// 打印姿态
@@ -49,6 +51,7 @@ int __ekf_slam::run(bool is_updated)
 
 			cout << "start calculating..." << endl << "displaying: " << endl;
 
+			cout << "numStates: " << numStates << endl;
 
 			if (numStates == 3)
 			{
@@ -71,53 +74,28 @@ int __ekf_slam::run(bool is_updated)
 				// 这边我们不用官方的手法，官方是通过距离进行匹配的，或者理解成根本不匹配
 				// 因为他认为：只要是刚进入测量范围的就一定是新的，所以直接当做新的更新矩阵
 
-				// 而我们使用匹配来做，手法就会不一样，我们通过landmark的数量来做，因为前一级已经做好匹配，新的总是排在最后
-				// 所以只要上一次的landmark数量小于本次的，则认为本次多出来的那些是新的
-				__point2p_rad z_lidar;
-				z_lidar.r = Z(2 * i, 0);
-				z_lidar.rad = Z(2 * i + 1, 0);
+                int min_seq = nearby_LMs();
 
-				// 检查了数据，静止的时候准倒是挺准，就是有时候经常会变成0
-				// 变成0能直接毁掉整个滤波器
-				// 这里工程手段直接解决
+                if (nearby_pt.r > min_dist_threshold)
+                {
+					__point2p_rad z_lidar;
+					new_State(z_lidar);
+					numStates = numStates + 2;			// increase number of states by 2 (1 for xi, 1 for yi)
+					stat = update_New(z_lidar);
+                }
+                else
+                {
+					int closest = 4 + 2 *(min_seq - 1) - 1;		//  else find closest LM and associate
 
-				if (landmark_num < landmark_num_last)
-					return -1;
+                	__point2p_rad z_lidar;
+					z_lidar.r = Z(2 * i, 0);			// 2 * landmark_num - 2
+					z_lidar.rad = Z(2 * i + 1, 0);		// 2 * landmark_num - 2 + 1
+														// find LM which is closest to observation
 
-				if (i < landmark_num && i >= landmark_num_last)		// i > landmark_num_last
-				{
-					// 如果是多出来的这一部分则认为是新的
-					new_State(z_lidar);								// add new state(i.e.increase all matrix sizes)
-					numStates = numStates + 2;						// increase number of states by 2 (1 for xi, 1 for yi)
-					stat = update_New(z_lidar);						// update state and covariance
-				}
-				else
-				{
-					// 因为已知i < landmark_num，所以此处i < landmark_num_last
-					// 原版的matlab的代码这边直接取找了个最近的来用，我们这边试着用下所有的看看效果怎么样
-					//__point2p_rad z_lidar;
-					//z_lidar.r = Z(2 * i, 0);
-					//z_lidar.rad = Z(2 * i + 1, 0);
+					update_Existing(z_lidar, closest);
 
-					// 这边做个调整，用最小的那个作为激光雷达的刷新点
-					int min_dst_seq = 0;
-					for (int j = 0; j < landmark_num; j++)
-					{
-						// 找到距离最小的点
-                        if (Z(2 * min_dst_seq, 0) > Z(2 * j, 0) &&
-							Z(2 * j, 0) != 0)
-							min_dst_seq = j;
-					}
-					if (min_dst_seq <= 0)
-						return 0;									// 如果得不到数据则放弃
+                }
 
-					z_lidar.r = Z(2 * min_dst_seq, 0);				// 2 * landmark_num - 2
-					z_lidar.rad = Z(2 * min_dst_seq + 1, 0);		// 2 * landmark_num - 2 + 1
-					stat = update_Existing(z_lidar, min_dst_seq);
-
-					if (stat == 0)
-						return 0;
-				}
 			}
 
 			// 这个部分是预留着用于重置卡尔曼滤波器的，因为有时候会出现NaN，这个时候就需要重置整个卡尔曼滤波器
@@ -195,7 +173,24 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	// 输入传感器参数
 	//MatrixXd temp;
 
-	match_Landmark(lidar);
+	//match_Landmark(lidar);			// 噪声太大，匹配精度上不去，所以干脆不匹配，直接用野蛮的办法
+	Z.resize(lidar.size() * 2, 1);
+	Z.setZero();
+
+	// 激光雷达参数
+	// 前次状态的保存的任务交给旧的建图和匹配模块，故这里无需关心，因为前一级已经处理好了
+	for (int i = 0, j = 0; i < Z.rows() - 1; i += 2, j++)
+	{
+		Z(i, 0)     = lidar[j].r / 1000.0f;				// mm/s^2 -> m/s^2
+		Z(i + 1, 0) = lidar[j].deg * PI / 180.0f;
+	}
+
+	landmark_num = lidar.size();
+	numStates = landmark.size() + 3;
+	//for (int i = 0; i < lidar.size(); i++)
+	//	cout << "lidar.r: " << lidar[i].r << "lidar.deg: " << lidar[i].deg << endl;
+	cout << "Z: " << endl << Z << endl;
+
 
 	// 加速度
 	Acc.X = a.X;
@@ -214,7 +209,7 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	Vlct.Y = v.Y;
 	Vlct.Z = v.Z;
 
-	//cout << "Vlct.X:" << Vlct.X << " " << "Vlct.Y" << Vlct.Y << endl;
+	cout << "Vlct.X:" << Vlct.X << " " << "Vlct.Y" << Vlct.Y << endl;
 
 	Pitch = pitch * PI / 180.0f;
 	Roll  = roll * PI / 180.0f;
@@ -222,7 +217,7 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 	// 偏航角
 	phi = yaw * PI / 180.0f;
 
-	//cout << "Pitch: " << Pitch << " Roll: " << Roll << " Yaw: " << phi << endl;
+	cout << "Pitch: " << Pitch << " Roll: " << Roll << " Yaw: " << phi << endl;
 
 	// 这边对做个处理，剪掉重力加速度在x轴和y轴的分量，然后对角度做个补偿，即加速度仅仅包含水平分量
 	// 那么重力怎么来呢？直接用9.8会有点不准，这边我们通过静止状态下的Z轴加速度得到
@@ -239,7 +234,7 @@ int __ekf_slam::get_Sensors(vector<__point2p> lidar, __Vec3f a, __Vec3f w, __Vec
 
 	// 后面发现这样也是不准的，因为飞的时候是重力和升力的合力
 
-	//cout << "Acc.X:" << Acc.X << " " << "Acc.Y:" << Acc.Y << endl;
+	cout << "Acc.X:" << Acc.X << " " << "Acc.Y:" << Acc.Y << endl;
 
 	dt = t;
 
@@ -653,6 +648,47 @@ int __ekf_slam::update_Existing(__point2p_rad z, int landmark)
 
 }// int __ekf_slam::update_Existing(__point2p_rad z, int landmark)
 
+int __ekf_slam:: nearby_LMs()
+{
+	// 野蛮方法，直接找到最近的用于EKF计算
+	int i;
+	double theta_temp, d_temp, x, y;
+	int min_seq;
+
+	__point2p_rad ret;
+	vector<float> theta, d;
+
+	theta.clear();
+	d.clear();
+	theta_temp = d_temp = 0;
+	for (i = 0; i < Z.rows() - 1; i += 2)
+	{
+
+		theta_temp = Z(i + 1, 0);
+		x = Xe(0, 0) + Z(i, 0) * cos(theta_temp);
+		y = Xe(0, 0) + Z(i, 0) * sin(theta_temp);
+		d_temp = sqrt(x * x + y * y);
+
+		theta.push_back(theta_temp);
+		d.push_back(d_temp);
+	}
+
+	min_seq = 0;
+	for (i = 0; i < theta.size(); i++)
+	{
+        if (d[min_seq] > d[i])
+			min_seq = i;
+	}
+
+	ret.r = d[min_seq];
+	ret.rad = theta[min_seq];		// 前面已经换过弧度制了
+
+	nearby_pt = ret;
+
+	return min_seq;
+
+
+}// int __ekf_slam:: nearby_LMs(MatrixXd Z)
 
 double __ekf_slam::normalize_Angle(double in)
 {

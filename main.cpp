@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
 			EKF.get_Sensors(Match.get_DataArray(),
 							Pix_Link.Acc, Pix_Link.W, Pix_Link.V,
 							Pitch, Roll, Yaw, dt);
-			//EKF.run(true);
+			EKF.run(true);
 
 
 			//i = 0;			// 知道这里有个bug，不管了
