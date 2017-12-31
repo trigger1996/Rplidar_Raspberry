@@ -41,7 +41,7 @@ int __cv_match::run()
 
 		int x_in = midpt.x - core.x;
 		int y_in = core.y - midpt.y;		// 注意这边的正负
-		temp.deg = tan_yaw(x_in, y_in);
+		temp.deg = arctan_yaw(x_in, y_in);
 
 		Data_Out.push_back(temp);
 	}
@@ -199,6 +199,59 @@ int __cv_match::merge_LineGroup()
 					is_selected[j] = true;
 
 
+				// 这边尝试修改一下直线的参数
+				// 这边用最长相距最长的点作为组合直线的参数，反正两个都是一条线上的东西不会差太多
+				if (is_selected[j] == true)
+				{
+					// 其实只要算四个距离
+					// pt_ref1-pt_ref2
+					// pt_ref1-pt2
+					// pt1-pt_ref_2
+					// pt1-pt2
+					double dst_pt[4] = { 0 };
+					int min_seq = 0;
+
+					dst_pt[0] = calc_Distance_Pt2Pt(pt_ref1, pt_ref2);
+					dst_pt[1] = calc_Distance_Pt2Pt(pt_ref1, pt2);
+					dst_pt[2] = calc_Distance_Pt2Pt(pt1, pt_ref2);
+					dst_pt[3] = calc_Distance_Pt2Pt(pt1, pt2);
+
+					for (int k = 0; k < 4; k++)
+					{
+						// 找到距离最大的
+						if (dst_pt[min_seq] < dst_pt[k])
+							min_seq = k;
+					}
+
+					// 换参数
+					//pt_ref1.x = lines[i][0], pt_ref1.y = lines[i][1];
+					//pt_ref2.x = lines[i][2], pt_ref2.y = lines[i][3];
+					switch (min_seq)
+					{
+						case 0 :
+							// 没差，不用换了
+							//lines[i][0] = lines[i][0]; lines[i][1] = lines[i][1];
+							//lines[i][2] = lines[i][2]; lines[i][3] = lines[i][3];
+						break;
+
+						case 1 :
+							lines[i][0] = lines[i][0]; lines[i][1] = lines[i][1];
+							lines[i][2] = lines[j][2]; lines[i][3] = lines[j][3];
+						break;
+
+						case 2 :
+							lines[i][0] = lines[j][0]; lines[i][1] = lines[j][1];
+							lines[i][2] = lines[i][2]; lines[i][3] = lines[i][3];
+						break;
+
+						case 3 :
+							lines[i][0] = lines[j][0]; lines[i][1] = lines[j][1];
+							lines[i][2] = lines[j][2]; lines[i][3] = lines[j][3];
+						break;
+					}
+				}
+
+
 			}
 		}
 	}
@@ -311,7 +364,7 @@ double calc_Distance_Pt2Pt(Point pt1, Point pt2)
 
 }// double calc_Distance_Pt2Pt(Point pt1, Point pt2)
 
-double tan_yaw(double x, double y)
+double arctan_yaw(double x, double y)
 {
 	// 这个是给图像用的tan，注意这边x是对边，y是邻边
 	// x是图像的x轴，y是图像的y轴
@@ -351,7 +404,7 @@ double tan_yaw(double x, double y)
 
 	return ret;
 
-}// double tan_yaw(double y, double x)
+}// double arctan_yaw(double y, double x)
 
 
 

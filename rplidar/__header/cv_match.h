@@ -13,7 +13,7 @@ using namespace cv;
 
 double calc_Distance_Pt2Line(Point pt1, Point pt2, Point core);
 double calc_Distance_Pt2Pt(Point pt1, Point pt2);
-double tan_yaw(double x, double y);
+double arctan_yaw(double x, double y);
 
 class __cv_match
 {
@@ -40,5 +40,6 @@ private:
 
 	int do_HoughTransformP(bool is_show, bool is_show_raw_data);
 	int merge_LineGroup();
+	int push_DataOut();
 
 };
